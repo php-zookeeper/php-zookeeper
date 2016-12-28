@@ -1,5 +1,12 @@
 zookeeper extension changelog
 
+Version 0.3.1
+-------------
+	Bugs:
+	* Fix memory leak in method getChildren (Thanks to hulk<hulk.website@gmail.com>, PR #5)
+	* Fix memory leak in method create (Thanks to Lin Huang, PR #6)
+
+
 Version 0.3.0
 -------------
 	Bugs:
