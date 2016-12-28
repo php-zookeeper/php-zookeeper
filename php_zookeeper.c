@@ -252,6 +252,7 @@ static PHP_METHOD(Zookeeper, create)
 	php_parse_acl_list(acl_info, &aclv);
 	status = zoo_create(i_obj->zk, path, value, value_len, (acl_info ? &aclv : 0), flags,
 						realpath, realpath_max);
+	php_aclv_destroy(&aclv);
 	if (status != ZOK) {
 		efree(realpath);
 		php_zk_throw_exception(status TSRMLS_CC);
