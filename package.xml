@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2016-11-18</date>
+ <date>2017-01-23</date>
  <version>
-  <release>0.3.0</release>
+  <release>0.3.1</release>
   <api>0.3.0</api>
  </version>
  <stability>
@@ -39,11 +39,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix session warning with PHP 7.1 (Issue #4)
-
-Improvements:
-- Support PHP-7 (PR #1)
-- Support exceptions (PR #2)
+- Fix memory leak in method getChildren (Thanks to hulk<hulk.website@gmail.com>, PR #5)
+- Fix memory leak in method create (Thanks to Lin Huang, PR #6)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -82,6 +79,17 @@ Improvements:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.3.1</release><api>0.3.0</api></version>
+   <date>2017-01-23</date>
+   <notes><![CDATA[
+Bugs:
+- Fix memory leak in method getChildren (Thanks to hulk<hulk.website@gmail.com>, PR #5)
+- Fix memory leak in method create (Thanks to Lin Huang, PR #6)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>alpha</api></stability>
    <version><release>0.3.0</release><api>0.3.0</api></version>
