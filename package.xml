@@ -69,7 +69,7 @@ Bugs:
   <required>
    <php>
     <min>5.2.0</min>
-    <max>7.1.0</max>
+    <max>7.1.99</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
