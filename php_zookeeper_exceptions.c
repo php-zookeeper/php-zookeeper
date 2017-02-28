@@ -25,6 +25,16 @@
 #include "php_zookeeper.h"
 #include "php_zookeeper_exceptions.h"
 
+#include <Zend/zend_exceptions.h>
+
+static zend_class_entry *zk_base_exception;
+static zend_class_entry *zk_optimeout_exception;
+static zend_class_entry *zk_connection_exception;
+static zend_class_entry *zk_marshalling_exception;
+static zend_class_entry *zk_auth_exception;
+static zend_class_entry *zk_session_exception;
+static zend_class_entry *zk_nonode_exception;
+
 void php_zk_register_exceptions(TSRMLS_D)
 {
 	zend_class_entry ce;
