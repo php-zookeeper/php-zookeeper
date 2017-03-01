@@ -1,5 +1,12 @@
 zookeeper extension changelog
 
+
+Version 0.3.2
+-------------
+	Bugs:
+	* Fix duplicate symbols (PR #10)
+
+
 Version 0.3.1
 -------------
 	Bugs:
