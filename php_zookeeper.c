@@ -67,6 +67,7 @@
   Structures and definitions
 ****************************************/
 typedef struct {
+	void ***thread_ctx;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zend_bool oneshot;
@@ -847,6 +848,14 @@ static php_cb_data_t* php_cb_data_new(zend_fcall_info *fci, zend_fcall_info_cach
 	cbd->fci = *fci;
 	cbd->fcc = *fcc;
 	cbd->oneshot = oneshot;
+#ifndef ZEND_ENGINE_3
+	TSRMLS_SET_CTX(cbd->thread_ctx);
+	if (cbd->fci.function_name) {
+		Z_ADDREF_P(cbd->fci.function_name);
+	}
+#else
+	Z_TRY_ADDREF(cbd->fci.function_name);
+#endif
 #ifdef ZEND_ENGINE_3
 	zend_hash_next_index_insert_mem(&ZK_G(callbacks), (void*)&cbd, sizeof(php_cb_data_t *));
 #else
@@ -860,6 +869,13 @@ static void php_cb_data_destroy(php_cb_data_t **entry)
 {
 	php_cb_data_t *cbd = *(php_cb_data_t **)entry;
 	if (cbd) {
+#ifndef ZEND_ENGINE_3
+		if (cbd->fci.function_name) {
+			Z_DELREF_P(cbd->fci.function_name);
+		}
+#else
+		Z_TRY_DELREF(cbd->fci.function_name);
+#endif
 		efree(cbd);
 	}
 }
@@ -875,9 +891,16 @@ static void php_cb_data_zv_destroy(zval *entry)
 
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
-	TSRMLS_FETCH();
-
 	php_cb_data_t *cb_data = (php_cb_data_t *)context;
+
+#if defined(ZEND_ENGINE_3) && defined(ZTS)
+	if( NULL == tsrm_get_ls_cache() ) {
+		return;
+	}
+#else
+	TSRMLS_FETCH_FROM_CTX(cb_data->thread_ctx);
+#endif
+
 #ifdef ZEND_ENGINE_3
 	zval params[3];
 	zval retval = {0};
