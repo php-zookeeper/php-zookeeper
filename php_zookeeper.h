@@ -37,7 +37,6 @@ extern zend_module_entry zookeeper_module_entry;
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(php_zookeeper)
-	HashTable callbacks;
 	long recv_timeout;
 	zend_bool session_lock;
 	long sess_lock_wait;
