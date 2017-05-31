@@ -118,6 +118,25 @@ static void php_aclv_destroy(struct ACL_vector *aclv);
 static void php_stat_to_array(const struct Stat *stat, zval *array);
 static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array);
 
+
+/****************************************
+  Async
+****************************************/
+
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+static void (*orig_interrupt_function)(zend_execute_data *execute_data);
+static void php_zk_dispatch() {
+    ;
+}
+static void php_zk_interrupt_function(zend_execute_data *execute_data)
+{
+	php_zk_dispatch();
+	if (orig_interrupt_function) {
+		orig_interrupt_function(execute_data);
+	}
+}
+#endif
+
 /****************************************
   Helper functions
 ****************************************/
@@ -873,6 +892,10 @@ static void php_cb_data_zv_destroy(zval *entry)
 }
 #endif
 
+static void php_zk_dispatch() {
+
+}
+
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
 	TSRMLS_FETCH();
@@ -933,6 +956,8 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 
 static void php_zk_completion_marshal(int rc, const void *context)
 {
+	php_cb_data_t *cb_data = (php_cb_data_t *)context;
+/*
 	TSRMLS_FETCH();
 
 #ifdef ZEND_ENGINE_3
@@ -974,6 +999,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 	if (cb_data->oneshot) {
 		zend_hash_index_del(&ZK_G(callbacks), cb_data->h);
 	}
+*/
 }
 
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv)
@@ -1428,6 +1454,15 @@ PHP_MINIT_FUNCTION(zookeeper)
 #endif
 
 	php_zk_register_exceptions(TSRMLS_C);
+
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+	orig_interrupt_function = zend_interrupt_function;
+	zend_interrupt_function = php_zk_interrupt_function;
+#elif defined(ZEND_ENGINE_3)
+	php_add_tick_function(php_zk_dispatch, NULL);
+#else
+	php_add_tick_function(php_zk_dispatch);
+#endif
 
 	return SUCCESS;
 }
