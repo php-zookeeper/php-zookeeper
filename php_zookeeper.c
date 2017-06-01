@@ -1022,8 +1022,12 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 	ZK_G(tail) = p;
 	ZK_G(pending_marshals) = 1;
 
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+	EG(vm_interrupt) = 1;
+#endif
+
 #if ZTS
-    	tsrm_set_interpreter_context(prev);
+	tsrm_set_interpreter_context(prev);
 #endif
 }
 
