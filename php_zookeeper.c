@@ -71,9 +71,9 @@ typedef struct _php_cb_data_t {
 	zend_fcall_info_cache fcc;
 	zend_bool oneshot;
 	ulong h;
-    	HashTable *ht;
+	HashTable *ht;
 #if ZTS
-    	void ***ctx;
+	void ***ctx;
 #endif
 } php_cb_data_t;
 
@@ -839,6 +839,13 @@ static void php_cb_data_destroy(php_cb_data_t **entry)
 {
 	php_cb_data_t *cbd = *(php_cb_data_t **)entry;
 	if (cbd) {
+#ifdef ZEND_ENGINE_3
+		Z_TRY_DELREF(cbd->fci.function_name);
+#else
+		if( cbd->fci.function_name ) {
+			Z_DELREF_P(cbd->fci.function_name);
+		}
+#endif
 		efree(cbd);
 	}
 }
@@ -897,14 +904,18 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 	cbd->fcc = *fcc;
 	cbd->oneshot = oneshot;
 #ifdef ZEND_ENGINE_3
+	Z_TRY_ADDREF(cbd->fci.function_name);
 	zend_hash_next_index_insert_mem(ht, (void*)&cbd, sizeof(php_cb_data_t *));
 #else
+	if( cbd->fci.function_name ) {
+		Z_ADDREF_P(cbd->fci.function_name);
+	}
 	zend_hash_next_index_insert(ht, (void*)&cbd, sizeof(php_cb_data_t *), NULL);
 #endif
 	cbd->h = zend_hash_num_elements(ht)-1;
-    	cbd->ht = ht;
+	cbd->ht = ht;
 #if ZTS
-    	cbd->ctx = tsrm_get_ls_cache();
+	cbd->ctx = tsrm_get_ls_cache();
 #endif
 	return cbd;
 }
