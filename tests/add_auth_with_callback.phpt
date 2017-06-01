@@ -7,8 +7,9 @@ if (!extension_loaded('zookeeper')) {
 };
 --FILE--
 <?php
+$fh = fopen('/dev/null', 'w');
 $client = new Zookeeper('localhost:2181');
-$client->setLogStream(fopen('/dev/null', 'w'));
+$client->setLogStream($fh);
 echo $client->addAuth('test', 'test', function() {
 	var_dump(func_get_args());
 }), PHP_EOL;

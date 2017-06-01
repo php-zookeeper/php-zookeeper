@@ -379,9 +379,9 @@ static PHP_METHOD(Zookeeper, get)
 	ZK_METHOD_FETCH_OBJECT;
 
 #ifdef ZEND_ENGINE_3
-    	if (stat_info) {
-        	ZVAL_DEREF(stat_info);
-    	}
+	if (stat_info) {
+		ZVAL_DEREF(stat_info);
+	}
 #endif
 
 	if (fci.size != 0) {
@@ -819,7 +819,7 @@ static void php_zk_destroy(php_zk_t *i_obj TSRMLS_DC)
 	if (i_obj->zk) {
 		zookeeper_close(i_obj->zk);
 	}
-    	zend_hash_destroy(&i_obj->callbacks);
+	zend_hash_destroy(&i_obj->callbacks);
 
 #ifndef ZEND_ENGINE_3
 	efree(i_obj);
@@ -828,7 +828,7 @@ static void php_zk_destroy(php_zk_t *i_obj TSRMLS_DC)
 
 static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
 {
-    	php_zk_t *i_obj;
+	php_zk_t *i_obj;
 
 	i_obj = php_zk_fetch_object(obj);
 	zend_object_std_dtor(&i_obj->zo TSRMLS_CC);
@@ -915,12 +915,12 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 	cbd->h = zend_hash_num_elements(ht)-1;
 	cbd->ht = ht;
 #if ZTS
-	cbd->ctx = tsrm_get_ls_cache();
+	TSRMLS_SET_CTX(cbd->ctx);
 #endif
 	return cbd;
 }
 
-static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path)
+static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path TSRMLS_DC)
 {
 #ifdef ZEND_ENGINE_3
 	zval params[3];
@@ -975,7 +975,7 @@ static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int sta
 	}
 }
 
-static inline void php_zk_dispatch_one_completion(php_cb_data_t *cb_data, int rc)
+static inline void php_zk_dispatch_one_completion(php_cb_data_t *cb_data, int rc TSRMLS_DC)
 {
 #ifdef ZEND_ENGINE_3
 	zval params[3];
@@ -1019,6 +1019,8 @@ static inline void php_zk_dispatch_one_completion(php_cb_data_t *cb_data, int rc
 
 static void php_zk_dispatch()
 {
+	TSRMLS_FETCH();
+
 	struct php_zk_pending_marshal *queue;
 	struct php_zk_pending_marshal *next;
 
@@ -1040,9 +1042,9 @@ static void php_zk_dispatch()
 	while( queue ) {
 		// Process
 		if( queue->is_completion ) {
-			php_zk_dispatch_one_completion(queue->cb_data, queue->rc);
+			php_zk_dispatch_one_completion(queue->cb_data, queue->rc TSRMLS_CC);
 		} else {
-			php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path);
+			php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path TSRMLS_CC);
 		}
 
 		// Move
@@ -1059,6 +1061,7 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 
 #if ZTS
 	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
+	TSRMLS_FETCH_FROM_CTX(cb_data->ctx);
 #endif
 
 	// Allocate new item
@@ -1094,6 +1097,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 
 #if ZTS
 	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
+	TSRMLS_FETCH_FROM_CTX(cb_data->ctx);
 #endif
 
 	// Allocate new item
