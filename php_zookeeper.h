@@ -39,8 +39,10 @@ extern zend_module_entry zookeeper_module_entry;
 struct php_zk_pending_marshal {
 	struct php_zk_pending_marshal *next;
 	struct _php_cb_data_t *cb_data;
+	char is_completion;
 	int type;
 	int state;
+	int rc;
 	char *path;
 };
 

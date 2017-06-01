@@ -909,7 +909,7 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 	return cbd;
 }
 
-static void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path)
+static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path)
 {
 #ifdef ZEND_ENGINE_3
 	zval params[3];
@@ -921,7 +921,7 @@ static void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, con
 
 	cb_data->fci.retval = &retval;
 #else
-    	zval **params[3];
+	zval **params[3];
 	zval *retval;
 	zval *z_type;
 	zval *z_state;
@@ -952,11 +952,53 @@ static void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, con
 	}
 
 #ifdef ZEND_ENGINE_3
-    	zval_ptr_dtor(&params[2]);
+	zval_ptr_dtor(&params[2]);
 #else
-    	zval_ptr_dtor(&z_type);
+	zval_ptr_dtor(&z_type);
 	zval_ptr_dtor(&z_state);
 	zval_ptr_dtor(&z_path);
+#endif
+
+	if (cb_data->oneshot) {
+		zend_hash_index_del(cb_data->ht, cb_data->h);
+	}
+}
+
+static inline void php_zk_dispatch_one_completion(php_cb_data_t *cb_data, int rc)
+{
+#ifdef ZEND_ENGINE_3
+	zval params[3];
+	zval retval = {0};
+
+	ZVAL_LONG(&params[0], rc);
+
+	cb_data->fci.retval = &retval;
+#else
+	zval **params[1];
+	zval *retval;
+	zval *z_rc;
+
+	MAKE_STD_ZVAL(z_rc);
+
+	ZVAL_LONG(z_rc, rc);
+
+	params[0] = &z_rc;
+
+	cb_data->fci.retval_ptr_ptr = &retval;
+#endif
+
+	cb_data->fci.params = params;
+	cb_data->fci.param_count = 1;
+
+	if (zend_call_function(&cb_data->fci, &cb_data->fcc TSRMLS_CC) == SUCCESS) {
+		zval_ptr_dtor(&retval);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not invoke completion callback");
+	}
+
+#ifdef ZEND_ENGINE_3
+#else
+	zval_ptr_dtor(&z_rc);
 #endif
 
 	if (cb_data->oneshot) {
@@ -986,7 +1028,11 @@ static void php_zk_dispatch()
 
 	while( queue ) {
 		// Process
-		php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path);
+		if( queue->is_completion ) {
+			php_zk_dispatch_one_completion(queue->cb_data, queue->rc);
+		} else {
+			php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path);
+		}
 
 		// Move
 		next = queue->next;
@@ -1001,7 +1047,7 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 	php_cb_data_t *cb_data = context;
 
 #if ZTS
-	void * prev = tsrm_set_interpreter_context(cb_data->ctx);
+	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
 #endif
 
 	// Allocate new item
@@ -1033,50 +1079,36 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 
 static void php_zk_completion_marshal(int rc, const void *context)
 {
-	php_cb_data_t *cb_data = (php_cb_data_t *)context;
-/*
-	TSRMLS_FETCH();
+	php_cb_data_t *cb_data = context;
 
-#ifdef ZEND_ENGINE_3
-	zval params[1];
-	zval retval = {0};
-	php_cb_data_t *cb_data = (php_cb_data_t *)context;
-
-	ZVAL_LONG(&params[0], rc);
-
-	cb_data->fci.retval = &retval;
-#else
-	zval **params[1];
-	zval *retval;
-	zval *z_rc;
-	php_cb_data_t *cb_data = (php_cb_data_t *)context;
-
-	MAKE_STD_ZVAL(z_rc);
-
-	ZVAL_LONG(z_rc, rc);
-
-	params[0] = &z_rc;
-
-	cb_data->fci.retval_ptr_ptr = &retval;
+#if ZTS
+	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
 #endif
 
-	cb_data->fci.params = params;
-	cb_data->fci.param_count = 1;
+	// Allocate new item
+	struct php_zk_pending_marshal *p = calloc(1, sizeof(struct php_zk_pending_marshal));
+	p->cb_data = context;
+	p->is_completion = 1;
+	p->rc = rc;
+	p->cb_data = cb_data;
 
-	if (zend_call_function(&cb_data->fci, &cb_data->fcc TSRMLS_CC) == SUCCESS) {
-		zval_ptr_dtor(&retval);
+	// Add to list
+	if( ZK_G(head) && ZK_G(tail) ) {
+		ZK_G(tail)->next = p;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not invoke completion callback");
+		ZK_G(head) = p;
 	}
 
-#ifndef ZEND_ENGINE_3
-	zval_ptr_dtor(&z_rc);
+	ZK_G(tail) = p;
+	ZK_G(pending_marshals) = 1;
+
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+	EG(vm_interrupt) = 1;
 #endif
 
-	if (cb_data->oneshot) {
-		zend_hash_index_del(&ZK_G(callbacks), cb_data->h);
-	}
-*/
+#if ZTS
+	tsrm_set_interpreter_context(prev);
+#endif
 }
 
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv)
