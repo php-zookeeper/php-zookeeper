@@ -6,8 +6,11 @@ session.save_path=localhost:2181
 --SKIPIF--
 <?php
 if (!extension_loaded('zookeeper')) {
-    echo 'Zookeeper extension is not loaded'
-};
+    echo 'Zookeeper extension is not loaded';
+} else if( getenv("NOSLOW") ) {
+    echo 'skip: no slow tests';
+}
+echo 'skip: ';
 --FILE--
 <?php
 session_start();

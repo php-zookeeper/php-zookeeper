@@ -66,12 +66,15 @@
 /****************************************
   Structures and definitions
 ****************************************/
-typedef struct {
+typedef struct _php_cb_data_t {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zend_bool oneshot;
 	ulong h;
     HashTable *ht;
+#if ZTS
+    void ***ctx;
+#endif
 } php_cb_data_t;
 
 typedef struct {
@@ -102,7 +105,7 @@ const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0, NULL, N
         { NULL, 0, NULL, 0, 0, 0, pass_rest_by_reference, return_reference, required_num_args },
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(php_zookeeper)
+ZEND_DECLARE_MODULE_GLOBALS(zookeeper)
 
 #ifdef COMPILE_DL_ZOOKEEPER
 ZEND_GET_MODULE(zookeeper)
@@ -119,6 +122,7 @@ static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv);
 static void php_aclv_destroy(struct ACL_vector *aclv);
 static void php_stat_to_array(const struct Stat *stat, zval *array);
 static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array);
+static void php_zk_dispatch();
 
 
 /****************************************
@@ -127,9 +131,6 @@ static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array);
 
 #if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
-static void php_zk_dispatch() {
-    ;
-}
 static void php_zk_interrupt_function(zend_execute_data *execute_data)
 {
 	php_zk_dispatch();
@@ -800,6 +801,11 @@ static PHP_METHOD(Zookeeper, setLogStream)
 }
 /* }}} */
 
+PHP_FUNCTION(zookeeper_dispatch)
+{
+    php_zk_dispatch();
+}
+
 /****************************************
   Internal support code
 ****************************************/
@@ -850,7 +856,7 @@ static void php_cb_data_zv_destroy(zval *entry)
 zend_object* php_zk_new(zend_class_entry *ce TSRMLS_DC)
 {
     php_zk_t *i_obj;
-	
+
     i_obj = ecalloc(1, sizeof(*i_obj));
 	zend_object_std_init( &i_obj->zo, ce TSRMLS_CC );
 	object_properties_init(&i_obj->zo, ce);
@@ -897,29 +903,25 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 #endif
 	cbd->h = zend_hash_num_elements(ht)-1;
     cbd->ht = ht;
+#if ZTS
+    cbd->ctx = tsrm_get_ls_cache();
+#endif
 	return cbd;
 }
 
-static void php_zk_dispatch() {
-
-}
-
-static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
+static void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path)
 {
-	TSRMLS_FETCH();
-
-	php_cb_data_t *cb_data = (php_cb_data_t *)context;
 #ifdef ZEND_ENGINE_3
-	zval params[3];
-	zval retval = {0};
+    zval params[3];
+    zval retval = {0};
 
-	ZVAL_LONG(&params[0], type);
-	ZVAL_LONG(&params[1], state);
-	PHP5TO7_ZVAL_STRING(&params[2], (char *)path);
+    ZVAL_LONG(&params[0], type);
+    ZVAL_LONG(&params[1], state);
+    PHP5TO7_ZVAL_STRING(&params[2], (char *)path);
 
-	cb_data->fci.retval = &retval;
+    cb_data->fci.retval = &retval;
 #else
-	zval **params[3];
+    zval **params[3];
 	zval *retval;
 	zval *z_type;
 	zval *z_state;
@@ -940,26 +942,89 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 	cb_data->fci.retval_ptr_ptr = &retval;
 #endif
 
-	cb_data->fci.params = params;
-	cb_data->fci.param_count = 3;
+    cb_data->fci.params = params;
+    cb_data->fci.param_count = 3;
 
-	if (zend_call_function(&cb_data->fci, &cb_data->fcc TSRMLS_CC) == SUCCESS) {
-		zval_ptr_dtor(&retval);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not invoke watcher callback");
-	}
+    if (zend_call_function(&cb_data->fci, &cb_data->fcc TSRMLS_CC) == SUCCESS) {
+        zval_ptr_dtor(&retval);
+    } else {
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not invoke watcher callback");
+    }
 
 #ifdef ZEND_ENGINE_3
-	zval_ptr_dtor(&params[2]);
+    zval_ptr_dtor(&params[2]);
 #else
-	zval_ptr_dtor(&z_type);
+    zval_ptr_dtor(&z_type);
 	zval_ptr_dtor(&z_state);
 	zval_ptr_dtor(&z_path);
 #endif
 
-	if (cb_data->oneshot) {
-		zend_hash_index_del(cb_data->ht, cb_data->h);
-	}
+    if (cb_data->oneshot) {
+        zend_hash_index_del(cb_data->ht, cb_data->h);
+    }
+}
+
+static void php_zk_dispatch()
+{
+    struct php_zk_pending_marshal *queue;
+    struct php_zk_pending_marshal *next;
+
+    if( !ZK_G(pending_marshals) ) {
+        return;
+    }
+
+    // Bail if the queue is empty or if we are already playing the queue
+    if ( !ZK_G(head) || ZK_G(processing_marshal_queue)) {
+        return;
+    }
+
+    // Prevent reentrant handler calls
+    ZK_G(processing_marshal_queue) = 1;
+
+    queue = ZK_G(head);
+    ZK_G(head) = NULL; /* simple stores are atomic */
+
+    while( queue ) {
+        // Process
+        php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path);
+
+        // Move
+        next = queue->next;
+        free(queue->path);
+        free(queue);
+        queue = next;
+    }
+}
+
+static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
+{
+    php_cb_data_t *cb_data = context;
+
+#if ZTS
+    void * prev = tsrm_set_interpreter_context(cb_data->ctx);
+#endif
+
+    // Allocate new item
+    struct php_zk_pending_marshal *p = calloc(1, sizeof(struct php_zk_pending_marshal));
+    p->cb_data = context;
+    p->type = type;
+    p->state = state;
+    p->path = strdup(path);
+    p->cb_data = cb_data;
+
+    // Add to list
+    if( ZK_G(head) && ZK_G(tail) ) {
+        ZK_G(tail)->next = p;
+    } else {
+        ZK_G(head) = p;
+    }
+
+    ZK_G(tail) = p;
+    ZK_G(pending_marshals) = 1;
+
+#if ZTS
+    tsrm_set_interpreter_context(prev);
+#endif
 }
 
 static void php_zk_completion_marshal(int rc, const void *context)
@@ -1037,7 +1102,7 @@ static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv)
 		if( Z_TYPE_P(entry) != IS_ARRAY ) {
 			continue;
 		}
-		
+
 		perms = zend_hash_str_find(Z_ARRVAL_P(entry), ZEND_STRL("perms"));
 		scheme = zend_hash_str_find(Z_ARRVAL_P(entry), ZEND_STRL("scheme"));
 		id = zend_hash_str_find(Z_ARRVAL_P(entry), ZEND_STRL("id"));
@@ -1147,17 +1212,6 @@ static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array)
 /* }}} */
 
 /* {{{ internal API functions */
-
-static void php_zk_init_globals(zend_php_zookeeper_globals *php_zookeeper_globals_p TSRMLS_DC)
-{
-	php_zookeeper_globals_p->recv_timeout = 10000;
-	php_zookeeper_globals_p->session_lock = 1;
-}
-
-static void php_zk_destroy_globals(zend_php_zookeeper_globals *php_zookeeper_globals_p TSRMLS_DC)
-{
-
-}
 
 PHP_ZOOKEEPER_API
 zend_class_entry *php_zk_get_ce(void)
@@ -1289,15 +1343,20 @@ static zend_function_entry zookeeper_class_methods[] = {
 	ZK_ME(setWatcher,         arginfo_setWatcher)
 	ZK_ME(setLogStream,       arginfo_setLogStream)
 
-    { NULL, NULL, NULL }
+    PHP_FE_END
 };
 #undef ZK_ME
 #undef ZK_ME_STATIC
 /* }}} */
 
-/* {{{ zookeeper_module_entry
- */
+/* {{{ zookeeper_function_entry */
+static const zend_function_entry zookeeper_functions[] = {
+	PHP_FE(zookeeper_dispatch, NULL)
+	PHP_FE_END
+};
+/* }}} */
 
+/* {{{ zookeeper_module_entry */
 zend_module_entry zookeeper_module_entry = {
 #if ZEND_MODULE_API_NO >= 20050922
     STANDARD_MODULE_HEADER_EX,
@@ -1307,14 +1366,18 @@ zend_module_entry zookeeper_module_entry = {
     STANDARD_MODULE_HEADER,
 #endif
 	"zookeeper",
-	NULL,
+	zookeeper_functions,
 	PHP_MINIT(zookeeper),
 	PHP_MSHUTDOWN(zookeeper),
-	NULL,
-	PHP_RSHUTDOWN(zookeeper),
+    PHP_RINIT(zookeeper),
+    PHP_RSHUTDOWN(zookeeper),
 	PHP_MINFO(zookeeper),
 	PHP_ZOOKEEPER_VERSION,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(zookeeper),
+    PHP_GINIT(zookeeper),
+    NULL,
+    NULL,
+    STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -1415,10 +1478,10 @@ int php_zookeeper_get_connection_le()
 #endif
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("zookeeper.recv_timeout",		"10000",	PHP_INI_ALL,	OnUpdateLongGEZero,	recv_timeout,	zend_php_zookeeper_globals, php_zookeeper_globals)
+	STD_PHP_INI_ENTRY("zookeeper.recv_timeout",		"10000",	PHP_INI_ALL,	OnUpdateLongGEZero,	recv_timeout,	zend_zookeeper_globals, zookeeper_globals)
 #ifdef HAVE_ZOOKEEPER_SESSION
-	STD_PHP_INI_ENTRY("zookeeper.session_lock",		"1",		PHP_INI_SYSTEM, OnUpdateBool,		session_lock,	zend_php_zookeeper_globals, php_zookeeper_globals)
-	STD_PHP_INI_ENTRY("zookeeper.sess_lock_wait",	"150000",	PHP_INI_ALL,	OnUpdateLongGEZero,	sess_lock_wait,	zend_php_zookeeper_globals,	php_zookeeper_globals)
+	STD_PHP_INI_ENTRY("zookeeper.session_lock",		"1",		PHP_INI_SYSTEM, OnUpdateBool,		session_lock,	zend_zookeeper_globals, zookeeper_globals)
+	STD_PHP_INI_ENTRY("zookeeper.sess_lock_wait",	"150000",	PHP_INI_ALL,	OnUpdateLongGEZero,	sess_lock_wait,	zend_zookeeper_globals,	zookeeper_globals)
 #endif
 PHP_INI_END()
 
@@ -1444,13 +1507,6 @@ PHP_MINIT_FUNCTION(zookeeper)
 
 	php_zk_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-#ifdef ZTS
-	ts_allocate_id(&php_zookeeper_globals_id, sizeof(zend_php_zookeeper_globals),
-				   (ts_allocate_ctor) php_zk_init_globals, (ts_allocate_dtor) php_zk_destroy_globals);
-#else
-	php_zk_init_globals(&php_zookeeper_globals TSRMLS_CC);
-#endif
-
 	REGISTER_INI_ENTRIES();
 #ifdef HAVE_ZOOKEEPER_SESSION
 	php_session_register_module(ps_zookeeper_ptr);
@@ -1474,21 +1530,41 @@ PHP_MINIT_FUNCTION(zookeeper)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(zookeeper)
 {
-#ifdef ZTS
-    ts_free_id(php_zookeeper_globals_id);
-#else
-    php_zk_destroy_globals(&php_zookeeper_globals TSRMLS_CC);
-#endif
-
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(zookeeper)
+{
+    ZK_G(head) = ZK_G(tail) = NULL;
+
+    return SUCCESS;
 }
 /* }}} */
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(zookeeper)
 {
-	return SUCCESS;
+    struct php_zk_pending_marshal *sig;
+
+    while( ZK_G(head) ) {
+        sig = ZK_G(head);
+        ZK_G(head) = sig->next;
+        free(sig);
+    }
+
+    return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_GINIT_FUNCTION */
+PHP_GINIT_FUNCTION(zookeeper)
+{
+    memset(zookeeper_globals, 0, sizeof(*zookeeper_globals));
+    zookeeper_globals->recv_timeout = 10000;
+    zookeeper_globals->session_lock = 1;
 }
 /* }}} */
 

@@ -36,25 +36,39 @@ extern zend_module_entry zookeeper_module_entry;
 #define PHP_ZOOKEEPER_API
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(php_zookeeper)
+struct php_zk_pending_marshal {
+	struct php_zk_pending_marshal *next;
+	struct _php_cb_data_t *cb_data;
+	int type;
+	int state;
+	char *path;
+};
+
+ZEND_BEGIN_MODULE_GLOBALS(zookeeper)
 	long recv_timeout;
 	zend_bool session_lock;
 	long sess_lock_wait;
-ZEND_END_MODULE_GLOBALS(php_zookeeper)
+	volatile char processing_marshal_queue;
+	volatile char pending_marshals;
+	struct php_zk_pending_marshal *head;
+	struct php_zk_pending_marshal *tail;
+ZEND_END_MODULE_GLOBALS(zookeeper)
 
 PHP_MINIT_FUNCTION(zookeeper);
 PHP_MSHUTDOWN_FUNCTION(zookeeper);
+PHP_RINIT_FUNCTION(zookeeper);
 PHP_RSHUTDOWN_FUNCTION(zookeeper);
 PHP_MINFO_FUNCTION(zookeeper);
+PHP_GINIT_FUNCTION(zookeeper);
 
 #define PHP_ZOOKEEPER_VERSION "0.3.2"
 
-ZEND_EXTERN_MODULE_GLOBALS(php_zookeeper)
+ZEND_EXTERN_MODULE_GLOBALS(zookeeper)
 
 #ifdef ZTS
-#define ZK_G(v) TSRMG(php_zookeeper_globals_id, zend_php_zookeeper_globals *, v)
+#define ZK_G(v) TSRMG(zookeeper_globals_id, zend_zookeeper_globals *, v)
 #else
-#define ZK_G(v) (php_zookeeper_globals.v)
+#define ZK_G(v) (zookeeper_globals.v)
 #endif
 
 #ifdef HAVE_ZOOKEEPER_SESSION
