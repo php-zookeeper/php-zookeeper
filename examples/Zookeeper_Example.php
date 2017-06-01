@@ -135,15 +135,15 @@ class Zookeeper_Example
 		}
 		return $this->zookeeper->getChildren($path);
 	}
-	
+
 	/**
 	 * Delete the node if it does not have any children
-	 * 
+	 *
 	 * @param string $path the path to the node
-	 * 
+	 *
 	 * @return true if node is deleted else null
 	 */
-	 
+
 	 public function deleteNode($path)
 	 {
 	 	if(!$this->zookeeper->exists($path))
@@ -155,7 +155,7 @@ class Zookeeper_Example
 	 		return $this->zookeeper->delete($path);
 	 	}
 	 }
-     
+
     /**
 	 * Wath a given path
 	 * @param string $path the path to node
@@ -167,7 +167,7 @@ class Zookeeper_Example
 		if (!is_callable($callback)) {
 			return null;
 		}
-		
+
 		if ($this->zookeeper->exists($path)) {
 			if (!isset($this->callback[$path])) {
 				$this->callback[$path] = array();
@@ -178,7 +178,7 @@ class Zookeeper_Example
 			}
 		}
 	}
-	
+
 	/**
 	 * Wath event callback warper
 	 * @param int $event_type
@@ -191,13 +191,13 @@ class Zookeeper_Example
 		if (!isset($this->callback[$path])) {
 			return null;
 		}
-		
+
 		foreach ($this->callback[$path] as $callback) {
 			$this->zookeeper->get($path, array($this, 'watchCallback'));
 			return call_user_func($callback);
 		}
 	}
-	
+
 	/**
 	 * Delete watch callback on a node, delete all callback when $callback is null
 	 * @param string $path
@@ -243,8 +243,9 @@ function callback() {
     echo "in watch callback\n";
 }
 $zk->set('/bar', 1);
-$ret = $zk->watch('/bar', 'callback'); 
+$ret = $zk->watch('/bar', 'callback');
 $zk->set('/bar', 2);
 while (true) {
-    sleep(1);
+    sleep(1);	
+    zookeeper_dispatch();
 }
