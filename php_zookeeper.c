@@ -25,6 +25,10 @@
 #include "config.h"
 #endif
 
+#if HAVE_PTHREAD
+#include <pthread.h>
+#endif
+
 #include <php.h>
 
 #ifdef ZTS
@@ -92,6 +96,8 @@ typedef struct {
 static zend_class_entry *zookeeper_ce = NULL;
 
 static zend_object_handlers zookeeper_obj_handlers;
+
+static pthread_mutex_t cb_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef HAVE_ZOOKEEPER_SESSION
 static int le_zookeeper_connection;
@@ -1033,6 +1039,10 @@ static void php_zk_dispatch()
 		return;
 	}
 
+#if HAVE_PTHREAD
+	pthread_mutex_lock(&cb_lock);
+#endif
+
 	// Prevent reentrant handler calls
 	ZK_G(processing_marshal_queue) = 1;
 
@@ -1053,11 +1063,23 @@ static void php_zk_dispatch()
 		free(queue);
 		queue = next;
 	}
+
+	ZK_G(processing_marshal_queue) = 0;
+	ZK_G(pending_marshals) = 0;
+
+#if HAVE_PTHREAD
+	pthread_mutex_unlock(&cb_lock);
+#endif
+
 }
 
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
 	php_cb_data_t *cb_data = context;
+
+#if HAVE_PTHREAD
+	pthread_mutex_lock(&cb_lock);
+#endif
 
 #if ZTS
 	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
@@ -1089,11 +1111,19 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 #if ZTS
 	tsrm_set_interpreter_context(prev);
 #endif
+
+#if HAVE_PTHREAD
+	pthread_mutex_unlock(&cb_lock);
+#endif
 }
 
 static void php_zk_completion_marshal(int rc, const void *context)
 {
 	php_cb_data_t *cb_data = context;
+
+#if HAVE_PTHREAD
+	pthread_mutex_lock(&cb_lock);
+#endif
 
 #if ZTS
 	void *prev = tsrm_set_interpreter_context(cb_data->ctx);
@@ -1123,6 +1153,10 @@ static void php_zk_completion_marshal(int rc, const void *context)
 
 #if ZTS
 	tsrm_set_interpreter_context(prev);
+#endif
+
+#if HAVE_PTHREAD
+	pthread_mutex_unlock(&cb_lock);
 #endif
 }
 
@@ -1590,6 +1624,10 @@ PHP_RINIT_FUNCTION(zookeeper)
 {
 	ZK_G(head) = ZK_G(tail) = NULL;
 
+#if HAVE_PTHREAD
+	pthread_mutex_init(&cb_lock, NULL);
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1604,6 +1642,10 @@ PHP_RSHUTDOWN_FUNCTION(zookeeper)
 		ZK_G(head) = sig->next;
 		free(sig);
 	}
+
+#if HAVE_PTHREAD
+	pthread_mutex_destroy(&cb_lock);
+#endif
 
 	return SUCCESS;
 }
