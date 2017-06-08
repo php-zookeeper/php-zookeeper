@@ -13,7 +13,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <name>Andrei Zmievski</name>
   <user>andrei</user>
   <email>andrei@php.net</email>
-  <active>yes</active>
+  <active>no</active>
  </lead>
  <lead>
   <name>Timandes White</name>
@@ -27,19 +27,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2017-03-31</date>
+ <date>2017-06-08</date>
  <version>
-  <release>0.3.2</release>
-  <api>0.3.0</api>
+  <release>0.4.0</release>
+  <api>0.4.0</api>
  </version>
  <stability>
-  <release>beta</release>
+  <release>alpha</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix duplicate symbols (PR #10)
+- Fix segmentation fault due to improperly implemented threading (PR #13)
+
+Improvements:
+- Add function 'zookeeper_dispatch'
    ]]></notes>
  <contents>
   <dir name="/">
@@ -78,7 +81,20 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
- <release>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.4.0</release><api>0.4.0</api></version>
+   <date>2017-06-08</date>
+   <notes><![CDATA[
+Bugs:
+- Fix segmentation fault due to improperly implemented threading (PR #13)
+
+Improvements:
+- Add function 'zookeeper_dispatch'
+   ]]></notes>
+  </release>
+
+  <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.3.2</release><api>0.3.0</api></version>
    <date>2017-03-31</date>
