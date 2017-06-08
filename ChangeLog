@@ -1,6 +1,14 @@
 zookeeper extension changelog
 
 
+Version 0.4.0
+-------------
+	Bugs:
+	* Fix segmentation fault due to improperly implemented threading (PR #13)
+
+	Improvements:
+	* Add function 'zookeeper_dispatch'
+
 Version 0.3.2
 -------------
 	Bugs:
