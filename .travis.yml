@@ -1,5 +1,6 @@
 language: php
 php:
+    - 7.2
     - 7.1
     - 7.0
     - 5.6
@@ -8,8 +9,8 @@ php:
     - 5.3
 
 env:
-    - LIBZOOKEEPER_VERSION=3.5.2-alpha
-    - LIBZOOKEEPER_VERSION=3.4.8
+    - LIBZOOKEEPER_VERSION=3.5.3-beta
+    - LIBZOOKEEPER_VERSION=3.4.11
 
 addons:
   apt:
