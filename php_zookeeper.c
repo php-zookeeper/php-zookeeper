@@ -909,6 +909,7 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 	cbd->fci = *fci;
 	cbd->fcc = *fcc;
 	cbd->oneshot = oneshot;
+	cbd->h = ht->nNextFreeElement;
 #ifdef ZEND_ENGINE_3
 	Z_TRY_ADDREF(cbd->fci.function_name);
 	zend_hash_next_index_insert_mem(ht, (void*)&cbd, sizeof(php_cb_data_t *));
@@ -918,7 +919,6 @@ static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_
 	}
 	zend_hash_next_index_insert(ht, (void*)&cbd, sizeof(php_cb_data_t *), NULL);
 #endif
-	cbd->h = zend_hash_num_elements(ht)-1;
 	cbd->ht = ht;
 #if ZTS
 	TSRMLS_SET_CTX(cbd->ctx);
