@@ -27,22 +27,19 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2017-06-08</date>
+ <date>2018-04-14</date>
  <version>
-  <release>0.4.0</release>
+  <release>0.4.1</release>
   <api>0.4.0</api>
  </version>
  <stability>
-  <release>alpha</release>
+  <release>beta</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix segmentation fault due to improperly implemented threading (PR #13)
-
-Improvements:
-- Add function 'zookeeper_dispatch'
+- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -81,6 +78,16 @@ Improvements:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>beta</release><api>alpha</api></stability>
+   <version><release>0.4.1</release><api>0.4.0</api></version>
+   <date>2018-04-14</date>
+   <notes><![CDATA[
+Bugs:
+- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>alpha</api></stability>
    <version><release>0.4.0</release><api>0.4.0</api></version>
