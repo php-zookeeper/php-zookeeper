@@ -123,6 +123,7 @@ ZEND_GET_MODULE(zookeeper)
 static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
 static void php_cb_data_destroy(php_cb_data_t **entry);
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
+static void php_zk_event_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
 static void php_zk_completion_marshal(int rc, const void *context);
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv);
 static void php_aclv_destroy(struct ACL_vector *aclv);
@@ -169,6 +170,7 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 	php_zk_t *i_obj;
 	zhandle_t *zk = NULL;
 	php_cb_data_t *cb_data = NULL;
+	clientid_t *client_id = 0;
 
 	if (recv_timeout <= 0) {
 		php_zk_throw_exception(ZBADARGUMENTS TSRMLS_CC);
@@ -184,8 +186,12 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 	if (fci->size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, fci, fcc, 0 TSRMLS_CC);
 	}
-	zk = zookeeper_init(host, (fci->size != 0) ? php_zk_watcher_marshal : NULL,
-						recv_timeout, 0, cb_data, 0);
+#ifdef HAVE_ZOOKEEPER_REUSE_SESSION
+	client_id = ZK_G(client_id);
+retry_init:
+#endif
+	zk = zookeeper_init(host, php_zk_event_watcher_marshal,
+						recv_timeout, client_id, cb_data, 0);
 
 	if (zk == NULL) {
 		php_zk_throw_exception(PHPZK_CONNECTION_FAILURE TSRMLS_CC);
@@ -195,6 +201,17 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 #endif
 		return;
 	}
+
+#ifdef HAVE_ZOOKEEPER_REUSE_SESSION
+	if (zoo_state(zk) == ZOO_EXPIRED_SESSION_STATE) {
+		client_id = 0;
+		if (ZK_G(client_id)) {
+			efree(ZK_G(client_id));
+			ZK_G(client_id) = NULL;
+		}
+		goto retry_init;
+	}
+#endif
 
 	i_obj->zk = zk;
 	i_obj->cb_data = cb_data;
@@ -1139,6 +1156,23 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 #if HAVE_PTHREAD
 	pthread_mutex_unlock(&cb_lock);
 #endif
+}
+
+static void php_zk_event_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
+{
+#ifdef HAVE_ZOOKEEPER_REUSE_SESSION
+	if (type == ZOO_SESSION_EVENT
+			&& state == ZOO_CONNECTED_STATE) { // Connected
+		if (!ZK_G(client_id))
+			ZK_G(client_id) = (clientid_t *)emalloc(sizeof(clientid_t));
+		memcpy(ZK_G(client_id), zoo_client_id(zk), sizeof(clientid_t));
+	}
+#endif
+	
+	if (!context)
+		return; // Skip
+
+	php_zk_watcher_marshal(zk, type, state, path, context);
 }
 
 static void php_zk_completion_marshal(int rc, const void *context)

@@ -8,6 +8,8 @@ PHP_ARG_ENABLE(zookeeper, whether to enable zookeeper support,
 PHP_ARG_ENABLE(zookeeper-session, whether to enable zookeeper session handler support,
 [  --disable-zookeeper-session      Disable zookeeper session handler support], yes, no)
 
+PHP_ARG_ENABLE(zookeeper-reuse-session, whether to enable ZooKeeper reuse-session-between-requests support,
+[  --enable-zookeeper-reuse-session      Enable ZooKeeper reuse session], no, no)
 
 PHP_ARG_WITH(libzookeeper-dir,  for libzookeeper,
 [  --with-libzookeeper-dir[=DIR]   Set the path to libzookeeper install prefix.], yes)
@@ -99,6 +101,11 @@ if test "$PHP_ZOOKEEPER" != "no"; then
   	  SESSION_INCLUDES=""
   	  AC_MSG_RESULT([disabled])
   	fi
+
+    if test "$PHP_ZOOKEEPER_REUSE_SESSION" == "yes"; then
+      AC_MSG_RESULT([enabled])
+      AC_DEFINE(HAVE_ZOOKEEPER_REUSE_SESSION,1,[whether ZooKeeper reuse-session-between-requests is enabled])
+    fi
 
     PHP_ADD_INCLUDE($PHP_LIBZOOKEEPER_INCDIR)
     PHP_ADD_LIBRARY_WITH_PATH(zookeeper_mt, $PHP_LIBZOOKEEPER_DIR/$PHP_LIBDIR, ZOOKEEPER_SHARED_LIBADD)

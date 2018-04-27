@@ -54,6 +54,9 @@ ZEND_BEGIN_MODULE_GLOBALS(zookeeper)
 	volatile char pending_marshals;
 	struct php_zk_pending_marshal *head;
 	struct php_zk_pending_marshal *tail;
+#ifdef HAVE_ZOOKEEPER_REUSE_SESSION
+	clientid_t *client_id;
+#endif
 ZEND_END_MODULE_GLOBALS(zookeeper)
 
 PHP_MINIT_FUNCTION(zookeeper);
