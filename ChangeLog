@@ -4,7 +4,7 @@ zookeeper extension changelog
 Version 0.4.1
 -------------
 	Bugs:
-	* Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89)
+	* Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89, #90)
 
 Version 0.4.0
 -------------

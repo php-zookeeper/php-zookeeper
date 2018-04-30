@@ -27,7 +27,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-04-14</date>
+ <date>2018-04-30</date>
  <version>
   <release>0.4.1</release>
   <api>0.4.0</api>
@@ -39,12 +39,13 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89)
+- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89, #90)
    ]]></notes>
  <contents>
   <dir name="/">
    <dir name="examples">
     <file role='doc' name='Zookeeper_Example.php'/>
+    <file role='doc' name='watch.php'/>
    </dir>
    <file role='doc' name='README.markdown'/>
    <file role='doc' name='CREDITS'/>
@@ -81,10 +82,10 @@ Bugs:
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.4.1</release><api>0.4.0</api></version>
-   <date>2018-04-14</date>
+   <date>2018-04-30</date>
    <notes><![CDATA[
 Bugs:
-- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89)
+- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89, #90)
    ]]></notes>
   </release>
 
