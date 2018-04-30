@@ -23,10 +23,10 @@
 #define PHP_ZK_LOG_INFO(_zh, ...) LOG_INFO(LOGCALLBACK(_zh), __VA_ARGS__)
 #define PHP_ZK_LOG_DEBUG(_zh, ...) LOG_DEBUG(LOGCALLBACK(_zh), __VA_ARGS__)
 #else
-#define PHP_ZK_LOG_ERROR(_zh, ...) LOG_ERROR(__VA_ARGS__)
-#define PHP_ZK_LOG_WARN(_zh, ...) LOG_WARN(__VA_ARGS__)
-#define PHP_ZK_LOG_INFO(_zh, ...) LOG_INFO(__VA_ARGS__)
-#define PHP_ZK_LOG_DEBUG(_zh, ...) LOG_DEBUG(__VA_ARGS__)
+#define PHP_ZK_LOG_ERROR(_zh, ...) LOG_ERROR((__VA_ARGS__))
+#define PHP_ZK_LOG_WARN(_zh, ...) LOG_WARN((__VA_ARGS__))
+#define PHP_ZK_LOG_INFO(_zh, ...) LOG_INFO((__VA_ARGS__))
+#define PHP_ZK_LOG_DEBUG(_zh, ...) LOG_DEBUG((__VA_ARGS__))
 #endif
 
 #endif   /* PHP_ZOOKEEPER34to35 */

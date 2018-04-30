@@ -47,11 +47,11 @@
 #endif
 
 #include "php5to7.h"
-#include "zookeeper34to35.h"
 #include "php_zookeeper.h"
 #include "php_zookeeper_private.h"
 #include "php_zookeeper_session.h"
 #include "php_zookeeper_exceptions.h"
+#include "zookeeper34to35.h"
 
 /****************************************
   Helper macros
@@ -124,6 +124,7 @@ ZEND_GET_MODULE(zookeeper)
 static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
 static void php_cb_data_destroy(php_cb_data_t **entry);
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
+static void php_zk_node_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
 static void php_zk_completion_marshal(int rc, const void *context);
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv);
 static void php_aclv_destroy(struct ACL_vector *aclv);
@@ -345,7 +346,7 @@ static PHP_METHOD(Zookeeper, getChildren)
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1 TSRMLS_CC);
 	}
 	status = zoo_wget_children(i_obj->zk, path,
-							   (fci.size != 0) ? php_zk_watcher_marshal : NULL,
+							   (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 							   cb_data, &strings);
 	if (status != ZOK) {
 		php_cb_data_destroy(&cb_data);
@@ -396,7 +397,7 @@ static PHP_METHOD(Zookeeper, get)
 	}
 
 	if (max_size <= 0) {
-		status = zoo_exists(i_obj->zk, path, 1, &stat);
+		status = zoo_exists(i_obj->zk, path, 0, &stat);/* I think we don't need zk->watcher any more */
 
 		if (status != ZOK) {
 			php_cb_data_destroy(&cb_data);
@@ -409,6 +410,7 @@ static PHP_METHOD(Zookeeper, get)
 	}
 
 	if (length <= 0) {/* znode carries a NULL */
+		/* FIXME: This branch will ignore the callback user provided if znode carries a NULL value */
 		if (stat_info) {
 			php_stat_to_array(&stat, stat_info);
 		}
@@ -416,8 +418,10 @@ static PHP_METHOD(Zookeeper, get)
 		RETURN_NULL();
 	}
 
+	PHP_ZK_LOG_INFO(i_obj->zk, "path=%s, cb_data=%p", path, cb_data);
+
 	buffer = emalloc (length+1);
-	status = zoo_wget(i_obj->zk, path, (fci.size != 0) ? php_zk_watcher_marshal : NULL,
+	status = zoo_wget(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 					  cb_data, buffer, &length, &stat);
 	buffer[length] = 0;
 
@@ -470,7 +474,7 @@ static PHP_METHOD(Zookeeper, exists)
 	if (fci.size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1 TSRMLS_CC);
 	}
-	status = zoo_wexists(i_obj->zk, path, (fci.size != 0) ? php_zk_watcher_marshal : NULL,
+	status = zoo_wexists(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 						 cb_data, &stat);
 	if (status != ZOK && status != ZNONODE) {
 		php_cb_data_destroy(&cb_data);
@@ -1074,8 +1078,23 @@ static void php_zk_dispatch()
 
 }
 
+static void php_zk_node_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
+{
+	// When client loses its connection or has just reconnected to the server,
+	// it also calls this function with type=ZOO_SESSION_EVENT and path=NULL for each watcher of node
+	// So I think we should skip this watcher we really don't need.
+	if (type == ZOO_SESSION_EVENT
+			&& (!path
+					|| !strlen(path)))
+		return;
+
+	php_zk_watcher_marshal(zk, type, state, path, context);
+}
+
 static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
+	PHP_ZK_LOG_DEBUG(zk, "type=%d, state=%d, path=%s, path(p)=%p, context=%p", type, state, path?path:"", path, context);
+
 	php_cb_data_t *cb_data = context;
 
 #if HAVE_PTHREAD
@@ -1120,6 +1139,8 @@ static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const cha
 
 static void php_zk_completion_marshal(int rc, const void *context)
 {
+	PHP_ZK_LOG_DEBUG(NULL, "rc=%d, context=%p", rc, context);
+
 	php_cb_data_t *cb_data = context;
 
 #if HAVE_PTHREAD

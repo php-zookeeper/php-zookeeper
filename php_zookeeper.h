@@ -21,6 +21,7 @@
 
 #include <zookeeper.h>
 #include <zookeeper_version.h>
+#include <zookeeper_log.h>
 #include <php.h>
 
 #ifdef HAVE_CONFIG_H
