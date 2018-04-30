@@ -9,7 +9,7 @@ php:
 
 env:
     - LIBZOOKEEPER_VERSION=3.5.3-beta
-    - LIBZOOKEEPER_VERSION=3.4.11
+    - LIBZOOKEEPER_VERSION=3.4.12
 
 matrix:
     include:
