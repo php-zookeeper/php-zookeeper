@@ -829,6 +829,70 @@ static PHP_METHOD(Zookeeper, close)
 }
 /* }}} */
 
+#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+/* {{{ Zookeeper::getConfig( .. )
+   */
+static PHP_METHOD(Zookeeper, getConfig)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	zval *stat_info = NULL;
+	php_cb_data_t *cb_data = NULL;
+	char *buffer;
+	struct Stat stat;
+	int status = ZOK;
+	int length = 512;
+	ZK_METHOD_INIT_VARS;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|f!z", &fci,
+							  &fcc, &stat_info) == FAILURE) {
+		return;
+	}
+
+	ZK_METHOD_FETCH_OBJECT;
+
+#ifdef ZEND_ENGINE_3
+	if (stat_info) {
+		ZVAL_DEREF(stat_info);
+	}
+#endif
+
+	if (fci.size != 0) {
+		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1 TSRMLS_CC);
+	}
+
+	buffer = emalloc (length+1);
+	status = zoo_wgetconfig(i_obj->zk, (fci.size != 0) ? php_zk_watcher_marshal : NULL,
+					  cb_data, buffer, &length, &stat);
+	buffer[length] = 0;
+
+	if (status != ZOK) {
+		efree (buffer);
+		php_cb_data_destroy(&cb_data);
+		php_zk_throw_exception(status TSRMLS_CC);
+
+		/* Indicate data marshalling failure with boolean false so that user can retry */
+		if (status == ZMARSHALLINGERROR) {
+			RETURN_FALSE;
+		}
+		return;
+	}
+
+	if (stat_info) {
+		php_stat_to_array(&stat, stat_info);
+	}
+
+	/* Length will be returned as -1 if the configuration data is NULL */
+	if (length == -1) {
+		RETURN_NULL();
+	}
+
+	PHP5TO7_RETVAL_STRINGL(buffer, length);
+	efree(buffer);
+}
+/* }}} */
+#endif
+
 PHP_FUNCTION(zookeeper_dispatch)
 {
     php_zk_dispatch();
@@ -1443,6 +1507,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_close, 0)
 ZEND_END_ARG_INFO()
+
+#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+ZEND_BEGIN_ARG_INFO(arginfo_getConfig, 0)
+	ZEND_ARG_INFO(0, watcher_cb)
+	ZEND_ARG_INFO(1, stat_info)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 /* {{{ zookeeper_class_methods */
@@ -1476,6 +1547,10 @@ static zend_function_entry zookeeper_class_methods[] = {
 	ZK_ME(setLogStream,       arginfo_setLogStream)
 
 	ZK_ME(close,              arginfo_close)
+
+#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+	ZK_ME(getConfig,          arginfo_getConfig)
+#endif
 
 	PHP_FE_END
 };
