@@ -51,6 +51,10 @@
 #include "php_zookeeper_private.h"
 #include "php_zookeeper_session.h"
 #include "php_zookeeper_exceptions.h"
+#include "php_zookeeper_class.h"
+#include "php_zookeeper_config_class.h"
+#include "php_zookeeper_stat.h"
+#include "php_zookeeper_callback.h"
 
 /****************************************
   Helper macros
@@ -70,28 +74,6 @@
 /****************************************
   Structures and definitions
 ****************************************/
-typedef struct _php_cb_data_t {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-	zend_bool oneshot;
-	ulong h;
-	HashTable *ht;
-#if ZTS
-	void ***ctx;
-#endif
-} php_cb_data_t;
-
-typedef struct {
-#if PHP_MAJOR_VERSION < 7
-	zend_object    zo;
-#endif
-	zhandle_t     *zk;
-	php_cb_data_t *cb_data;
-	HashTable callbacks;
-#if PHP_MAJOR_VERSION >= 7
-	zend_object    zo;
-#endif
-} php_zk_t;
 
 static zend_class_entry *zookeeper_ce = NULL;
 
@@ -120,13 +102,9 @@ ZEND_GET_MODULE(zookeeper)
 /****************************************
   Forward declarations
 ****************************************/
-static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
-static void php_cb_data_destroy(php_cb_data_t **entry);
-static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
 static void php_zk_completion_marshal(int rc, const void *context);
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv);
 static void php_aclv_destroy(struct ACL_vector *aclv);
-static void php_stat_to_array(const struct Stat *stat, zval *array);
 static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array);
 static void php_zk_dispatch();
 static void php_zk_close(php_zk_t *i_obj TSRMLS_DC);
@@ -829,61 +807,15 @@ static PHP_METHOD(Zookeeper, close)
    */
 static PHP_METHOD(Zookeeper, getConfig)
 {
-	zend_fcall_info fci = empty_fcall_info;
-	zend_fcall_info_cache fcc = empty_fcall_info_cache;
-	zval *stat_info = NULL;
-	php_cb_data_t *cb_data = NULL;
-	char *buffer;
-	struct Stat stat;
-	int status = ZOK;
-	int length = 512;
 	ZK_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|f!z", &fci,
-							  &fcc, &stat_info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
 		return;
 	}
 
 	ZK_METHOD_FETCH_OBJECT;
 
-#ifdef ZEND_ENGINE_3
-	if (stat_info) {
-		ZVAL_DEREF(stat_info);
-	}
-#endif
-
-	if (fci.size != 0) {
-		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1 TSRMLS_CC);
-	}
-
-	buffer = emalloc (length+1);
-	status = zoo_wgetconfig(i_obj->zk, (fci.size != 0) ? php_zk_watcher_marshal : NULL,
-					  cb_data, buffer, &length, &stat);
-	buffer[length] = 0;
-
-	if (status != ZOK) {
-		efree (buffer);
-		php_cb_data_destroy(&cb_data);
-		php_zk_throw_exception(status TSRMLS_CC);
-
-		/* Indicate data marshalling failure with boolean false so that user can retry */
-		if (status == ZMARSHALLINGERROR) {
-			RETURN_FALSE;
-		}
-		return;
-	}
-
-	if (stat_info) {
-		php_stat_to_array(&stat, stat_info);
-	}
-
-	/* Length will be returned as -1 if the configuration data is NULL */
-	if (length == -1) {
-		RETURN_NULL();
-	}
-
-	PHP5TO7_RETVAL_STRINGL(buffer, length);
-	efree(buffer);
+	RETURN_OBJ(php_zk_config_new_from_zk(php_zk_config_ce, i_obj));
 }
 /* }}} */
 #endif
@@ -927,21 +859,6 @@ static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
 	i_obj = php_zk_fetch_object(obj);
 	zend_object_std_dtor(&i_obj->zo TSRMLS_CC);
 	php_zk_destroy(i_obj TSRMLS_CC);
-}
-
-static void php_cb_data_destroy(php_cb_data_t **entry)
-{
-	php_cb_data_t *cbd = *(php_cb_data_t **)entry;
-	if (cbd) {
-#ifdef ZEND_ENGINE_3
-		Z_TRY_DELREF(cbd->fci.function_name);
-#else
-		if( cbd->fci.function_name ) {
-			Z_DELREF_P(cbd->fci.function_name);
-		}
-#endif
-		efree(cbd);
-	}
 }
 
 #ifdef ZEND_ENGINE_3
@@ -990,29 +907,6 @@ zend_object_value php_zk_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 #endif
-
-static php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC)
-{
-	php_cb_data_t *cbd = ecalloc(sizeof(php_cb_data_t), 1);
-	cbd->fci = *fci;
-	cbd->fcc = *fcc;
-	cbd->oneshot = oneshot;
-	cbd->h = ht->nNextFreeElement;
-#ifdef ZEND_ENGINE_3
-	Z_TRY_ADDREF(cbd->fci.function_name);
-	zend_hash_next_index_insert_mem(ht, (void*)&cbd, sizeof(php_cb_data_t *));
-#else
-	if( cbd->fci.function_name ) {
-		Z_ADDREF_P(cbd->fci.function_name);
-	}
-	zend_hash_next_index_insert(ht, (void*)&cbd, sizeof(php_cb_data_t *), NULL);
-#endif
-	cbd->ht = ht;
-#if ZTS
-	TSRMLS_SET_CTX(cbd->ctx);
-#endif
-	return cbd;
-}
 
 static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int state, const char *path TSRMLS_DC)
 {
@@ -1161,7 +1055,7 @@ static void php_zk_dispatch()
 
 }
 
-static void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
+void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
 	php_cb_data_t *cb_data = context;
 
@@ -1336,31 +1230,6 @@ static void php_aclv_destroy(struct ACL_vector *aclv)
 	free(aclv->data);
 }
 
-static void php_stat_to_array(const struct Stat *stat, zval *array)
-{
-	if( !array ) {
-		return;
-	}
-	if( Z_TYPE_P(array) != IS_ARRAY ) {
-#ifdef ZEND_ENGINE_3
-		zval_ptr_dtor(array);
-#endif
-		array_init(array);
-	}
-
-	add_assoc_double_ex(array, PHP5TO7_STRS("czxid"), stat->czxid);
-	add_assoc_double_ex(array, PHP5TO7_STRS("mzxid"), stat->mzxid);
-	add_assoc_double_ex(array, PHP5TO7_STRS("ctime"), stat->ctime);
-	add_assoc_double_ex(array, PHP5TO7_STRS("mtime"), stat->mtime);
-	add_assoc_long_ex(array, PHP5TO7_STRS("version"), stat->version);
-	add_assoc_long_ex(array, PHP5TO7_STRS("cversion"), stat->cversion);
-	add_assoc_long_ex(array, PHP5TO7_STRS("aversion"), stat->aversion);
-	add_assoc_double_ex(array, PHP5TO7_STRS("ephemeralOwner"), stat->ephemeralOwner);
-	add_assoc_long_ex(array, PHP5TO7_STRS("dataLength"), stat->dataLength);
-	add_assoc_long_ex(array, PHP5TO7_STRS("numChildren"), stat->numChildren);
-	add_assoc_double_ex(array, PHP5TO7_STRS("pzxid"), stat->pzxid);
-}
-
 static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array)
 {
 	int i;
@@ -1489,8 +1358,6 @@ ZEND_END_ARG_INFO()
 
 #if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
 ZEND_BEGIN_ARG_INFO(arginfo_getConfig, 0)
-	ZEND_ARG_INFO(0, watcher_cb)
-	ZEND_ARG_INFO(1, stat_info)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
@@ -1701,6 +1568,12 @@ PHP_MINIT_FUNCTION(zookeeper)
 #endif
 
 	php_zk_register_exceptions(TSRMLS_C);
+
+#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#ifdef ZEND_ENGINE_3
+	php_zk_config_register(TSRMLS_C);
+#endif
+#endif
 
 #if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
 	orig_interrupt_function = zend_interrupt_function;

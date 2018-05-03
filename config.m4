@@ -109,7 +109,7 @@ if test "$PHP_ZOOKEEPER" != "no"; then
     ])
 
     PHP_SUBST(ZOOKEEPER_SHARED_LIBADD)
-    PHP_NEW_EXTENSION(zookeeper, php_zookeeper.c zoo_lock.c $SESSION_EXTRA_FILES php_zookeeper_exceptions.c, $ext_shared,,$SESSION_INCLUDES)
+    PHP_NEW_EXTENSION(zookeeper, php_zookeeper.c zoo_lock.c $SESSION_EXTRA_FILES php_zookeeper_exceptions.c php_zookeeper_config_class.c php_zookeeper_stat.c php_zookeeper_callback.c, $ext_shared,,$SESSION_INCLUDES)
 
   fi
 

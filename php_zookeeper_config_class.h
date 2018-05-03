@@ -10,25 +10,16 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Ryan Uber <ru@ryanuber.com>                                 |
-  |          Timandes White <timands@gmail.com>                          |
+  | Authors: Timandes White <timands@gmail.com>                          |
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_ZOOKEEPER_EXCEPTIONS
-#define PHP_ZOOKEEPER_EXCEPTIONS
+#ifndef PHP_ZOOKEEPER_CONFIG_CLASS
+#define PHP_ZOOKEEPER_CONFIG_CLASS
 
-/**
- * register exceptions
- */
-void php_zk_register_exceptions(TSRMLS_D);
-zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message TSRMLS_DC);
-/**
- * throw exception according to status
- */
-void php_zk_throw_exception(int zk_status TSRMLS_DC);
+zend_class_entry *php_zk_config_ce;
 
-#define PHPZK_CONNECTION_FAILURE 5999
-#define PHPZK_CONNECT_NOT_CALLED 5998
+void php_zk_config_register(TSRMLS_D);
+zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk TSRMLS_DC);
 
-#endif  /* PHP_ZOOKEEPER_EXCEPTIONS */
+#endif  /* PHP_ZOOKEEPER_CONFIG_CLASS */

@@ -10,25 +10,28 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Ryan Uber <ru@ryanuber.com>                                 |
-  |          Timandes White <timands@gmail.com>                          |
+  | Authors: Timandes White <timands@gmail.com>                          |
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_ZOOKEEPER_EXCEPTIONS
-#define PHP_ZOOKEEPER_EXCEPTIONS
+#ifndef PHP_ZOOKEEPER_CALLBACK
+#define PHP_ZOOKEEPER_CALLBACK
 
-/**
- * register exceptions
- */
-void php_zk_register_exceptions(TSRMLS_D);
-zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message TSRMLS_DC);
-/**
- * throw exception according to status
- */
-void php_zk_throw_exception(int zk_status TSRMLS_DC);
+#include <zookeeper.h>
+#include <php.h>
 
-#define PHPZK_CONNECTION_FAILURE 5999
-#define PHPZK_CONNECT_NOT_CALLED 5998
+typedef struct _php_cb_data_t {
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    zend_bool oneshot;
+    ulong h;
+    HashTable *ht;
+#if ZTS
+    void ***ctx;
+#endif
+} php_cb_data_t;
 
-#endif  /* PHP_ZOOKEEPER_EXCEPTIONS */
+php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
+void php_cb_data_destroy(php_cb_data_t **entry);
+
+#endif  /* PHP_ZOOKEEPER_CALLBACK */
