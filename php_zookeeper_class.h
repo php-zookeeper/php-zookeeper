@@ -10,25 +10,28 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Ryan Uber <ru@ryanuber.com>                                 |
-  |          Timandes White <timands@gmail.com>                          |
+  | Authors: Timandes White <timands@gmail.com>                          |
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_ZOOKEEPER_EXCEPTIONS
-#define PHP_ZOOKEEPER_EXCEPTIONS
+#ifndef PHP_ZOOKEEPER_CLASS
+#define PHP_ZOOKEEPER_CLASS
 
-/**
- * register exceptions
- */
-void php_zk_register_exceptions(TSRMLS_D);
-zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message TSRMLS_DC);
-/**
- * throw exception according to status
- */
-void php_zk_throw_exception(int zk_status TSRMLS_DC);
+#include <zookeeper.h>
+#include "php_zookeeper_callback.h"
 
-#define PHPZK_CONNECTION_FAILURE 5999
-#define PHPZK_CONNECT_NOT_CALLED 5998
+typedef struct {
+#if PHP_MAJOR_VERSION < 7
+    zend_object    zo;
+#endif
+    zhandle_t     *zk;
+    php_cb_data_t *cb_data;
+    HashTable callbacks;
+#if PHP_MAJOR_VERSION >= 7
+    zend_object    zo;
+#endif
+} php_zk_t;
 
-#endif  /* PHP_ZOOKEEPER_EXCEPTIONS */
+void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);
+
+#endif  /* PHP_ZOOKEEPER_CLASS */
