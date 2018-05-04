@@ -13,6 +13,7 @@
   | Authors: Timandes White <timands@gmail.com>                          |
   +----------------------------------------------------------------------+
 */
+#include <php.h>
 
 #include "php5to7.h"
 #include "php_zookeeper_stat.h"

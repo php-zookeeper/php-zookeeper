@@ -1,4 +1,6 @@
 
+#include <php.h>
+
 #ifdef ZEND_ENGINE_3
 typedef size_t strsize_t;
 #define php5to7_add_assoc_string_ex add_assoc_string_ex

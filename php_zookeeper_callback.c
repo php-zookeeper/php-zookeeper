@@ -14,6 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
+#include <php.h>
+
 #include "php_zookeeper_callback.h"
 
 php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC)
