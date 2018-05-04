@@ -63,6 +63,7 @@ Bugs:
    <file role='src' name='php5to7.h'/>
    <file role='src' name='php_zookeeper_exceptions.c'/>
    <file role='src' name='php_zookeeper_exceptions.h'/>
+   <file role='src' name='zookeeper34to35.h'/>
   </dir> <!-- / -->
  </contents>
  <dependencies>
