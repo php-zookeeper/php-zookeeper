@@ -1141,7 +1141,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 {
 	PHP_ZK_LOG_DEBUG(NULL, "rc=%d, context=%p", rc, context);
 
-	php_cb_data_t *cb_data = context;
+	php_cb_data_t *cb_data = (php_cb_data_t *)context;
 
 #if HAVE_PTHREAD
 	pthread_mutex_lock(&cb_lock);
@@ -1154,7 +1154,6 @@ static void php_zk_completion_marshal(int rc, const void *context)
 
 	// Allocate new item
 	struct php_zk_pending_marshal *p = calloc(1, sizeof(struct php_zk_pending_marshal));
-	p->cb_data = context;
 	p->is_completion = 1;
 	p->rc = rc;
 	p->cb_data = cb_data;
