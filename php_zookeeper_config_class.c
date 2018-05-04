@@ -32,6 +32,9 @@ static zend_object_handlers php_zk_conf_obj_handlers;
 static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj);
 static zend_object* php_zk_config_new(zend_class_entry *ce TSRMLS_DC);
 
+static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, const char *joining,
+        const char *leaving, const char *members, int64_t version, zval **stat_info_pp);
+
 #define Z_ZK_CONF_P(zv) php_zk_conf_fetch_object(Z_OBJ_P((zv)))
 
 #define PHP_ZK_CONF_METHOD_INIT_VARS                \
@@ -106,6 +109,63 @@ static PHP_METHOD(ZookeeperConfig, get)
 }
 /* }}} */
 
+
+/* {{{ ZookeeperConfig::set( .. )
+   */
+static PHP_METHOD(ZookeeperConfig, set)
+{
+    char *members;
+    strsize_t members_len;
+    int64_t version = -1;
+    zval *stat_info_p = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+                              &version, &stat_info_p) == FAILURE) {
+        return;
+    }
+
+    php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, NULL, members, version, &stat_info_p);
+}
+/* }}} */
+
+
+/* {{{ ZookeeperConfig::add( .. )
+   */
+static PHP_METHOD(ZookeeperConfig, add)
+{
+    char *members;
+    strsize_t members_len;
+    int64_t version = -1;
+    zval *stat_info_p = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+                              &version, &stat_info_p) == FAILURE) {
+        return;
+    }
+
+    php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, members, NULL, NULL, version, &stat_info_p);
+}
+/* }}} */
+
+
+/* {{{ ZookeeperConfig::remove( .. )
+   */
+static PHP_METHOD(ZookeeperConfig, remove)
+{
+    char *members;
+    strsize_t members_len;
+    int64_t version = -1;
+    zval *stat_info_p = NULL;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+                              &version, &stat_info_p) == FAILURE) {
+        return;
+    }
+
+    php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL, members, NULL, version, &stat_info_p);
+}
+/* }}} */
+
 /* {{{ methods arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_conf_get, 0)
     ZEND_ARG_INFO(0, watcher_cb)
@@ -113,17 +173,20 @@ ZEND_BEGIN_ARG_INFO(arginfo_conf_get, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_conf_add, 0, 0, 1)
-    ZEND_ARG_INFO(0, servers)
+    ZEND_ARG_INFO(0, members)
+    ZEND_ARG_INFO(0, version)
     ZEND_ARG_INFO(1, stat_info)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_conf_remove, 0, 0, 1)
-    ZEND_ARG_INFO(0, servers)
+    ZEND_ARG_INFO(0, members)
+    ZEND_ARG_INFO(0, version)
     ZEND_ARG_INFO(1, stat_info)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_conf_set, 0, 0, 1)
-    ZEND_ARG_INFO(0, servers)
+    ZEND_ARG_INFO(0, members)
+    ZEND_ARG_INFO(0, version)
     ZEND_ARG_INFO(1, stat_info)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -132,9 +195,9 @@ ZEND_END_ARG_INFO()
 #define ZK_CONF_ME(name, args) PHP_ME(ZookeeperConfig, name, args, ZEND_ACC_PUBLIC)
 static zend_function_entry zookeeper_config_class_methods[] = {
     ZK_CONF_ME(get,             arginfo_conf_get)
-    //ZK_CONF_ME(add,             arginfo_conf_add)
-    //ZK_CONF_ME(remove,          arginfo_conf_remove)
-    //ZK_CONF_ME(set,             arginfo_conf_set)
+    ZK_CONF_ME(add,             arginfo_conf_add)
+    ZK_CONF_ME(remove,          arginfo_conf_remove)
+    ZK_CONF_ME(set,             arginfo_conf_set)
     PHP_FE_END
 };
 #undef ZK_CONF_ME
@@ -190,4 +253,41 @@ zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk TS
         i_obj->php_zk = php_zk;
 
     return &i_obj->zo;
+}
+
+static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, const char *joining,
+        const char *leaving, const char *members, int64_t version, zval **stat_info_pp)
+{
+    char *buffer = NULL;
+    int buffer_len = 512;
+    struct Stat stat;
+    int status = ZOK;
+    PHP_ZK_CONF_METHOD_INIT_VARS;
+
+    PHP_ZK_CONF_METHOD_FETCH_OBJECT;
+
+    if (*stat_info_pp) {
+        ZVAL_DEREF(*stat_info_pp);
+    }
+
+    buffer = emalloc (buffer_len+1);
+    status = zoo_reconfig(i_obj->php_zk->zk, NULL, NULL, members, version, buffer, &buffer_len, &stat);
+    buffer[buffer_len] = 0;
+
+    if (status != ZOK) {
+        php_zk_throw_exception(status TSRMLS_CC);
+        return;
+    }
+
+    if (*stat_info_pp) {
+        php_stat_to_array(&stat, *stat_info_pp);
+    }
+
+    /* Length will be returned as -1 if the configuration data is NULL */
+    if (buffer_len == -1) {
+        RETURN_NULL();
+    }
+
+    PHP5TO7_RETVAL_STRINGL(buffer, buffer_len);
+    efree(buffer);
 }
