@@ -1,6 +1,12 @@
 zookeeper extension changelog
 
 
+Version 0.5.0
+-------------
+	Improvements:
+	* Add method 'close'
+	php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
+
 Version 0.4.1
 -------------
 	Bugs:
