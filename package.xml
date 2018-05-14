@@ -27,19 +27,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-05-04</date>
+ <date>2018-05-14</date>
  <version>
-  <release>0.4.1</release>
-  <api>0.4.0</api>
+  <release>0.5.0</release>
+  <api>0.5.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>alpha</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-Bugs:
-- Fix 'Corrupted fcall_info provided to zend_call_function()' (AZ Issue #89, #90)
+Improvements:
+- Add method 'close'
+php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
    ]]></notes>
  <contents>
   <dir name="/">
@@ -80,6 +81,17 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>stable</release><api>stable</api></stability>
+   <version><release>0.5.0</release><api>0.5.0</api></version>
+   <date>2018-05-14</date>
+   <notes><![CDATA[
+Improvements:
+- Add method 'close'
+php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.4.1</release><api>0.4.0</api></version>
