@@ -271,7 +271,7 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
     }
 
     buffer = emalloc (buffer_len+1);
-    status = zoo_reconfig(i_obj->php_zk->zk, NULL, NULL, members, version, buffer, &buffer_len, &stat);
+    status = zoo_reconfig(i_obj->php_zk->zk, joining, leaving, members, version, buffer, &buffer_len, &stat);
     buffer[buffer_len] = 0;
 
     if (status != ZOK) {
