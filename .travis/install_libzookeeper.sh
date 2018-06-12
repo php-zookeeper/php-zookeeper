@@ -7,8 +7,7 @@ LIBZOOKEEPER_MINOR_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $2}
 PACKAGE_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
 LIBZOOKEEPER_PREFIX=${HOME}/lib${PACKAGE_NAME}
 
-TMP=`dirname $0`
-TRAVIS_SCRIPT_DIR=`realpath ${TMP}`
+TRAVIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 wget http://apache.mirrors.lucidnetworks.net/zookeeper/${PACKAGE_NAME}/${PACKAGE_NAME}.tar.gz || exit 1
 tar xvf ${PACKAGE_NAME}.tar.gz || exit 1
