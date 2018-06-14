@@ -14,5 +14,5 @@ make install || exit 1
 echo "extension=zookeeper.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 lcov --directory . --zerocounters &&
 lcov --directory . --capture --initial --output-file coverage.info
-./dev-tools/test.sh
+./dev-tools/test.sh || exit 1
 lcov --no-checksum --directory . --capture --output-file coverage.info

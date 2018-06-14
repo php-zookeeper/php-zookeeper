@@ -20,3 +20,9 @@ REPORT_EXIT_STATUS=1 \
 ${USE_PHP} \
   -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 \
   run-tests.php -n -d extension_dir=modules -d extension=zookeeper.so ${TEST}
+
+if [ $? -ne 0 ]; then
+    echo "Dumping diff files ..." >&2
+    find . -name *.diff|xargs cat
+    exit 1
+fi
