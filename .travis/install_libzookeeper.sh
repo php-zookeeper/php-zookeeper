@@ -14,8 +14,9 @@ tar xvf ${PACKAGE_NAME}.tar.gz || exit 1
 
 if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 ]; then
     cd ${PACKAGE_NAME}
-    ${TRAVIS_SCRIPT_DIR}/init_zk_instances.sh || exit 1
-    ${TRAVIS_SCRIPT_DIR}/launch_zk_instances.sh || exit 1
+        ${TRAVIS_SCRIPT_DIR}/init_zk_instances.sh || exit 1
+        ${TRAVIS_SCRIPT_DIR}/launch_zk_instances.sh || exit 1
+    cd ..
 else
     mv ${PACKAGE_NAME}/conf/zoo_sample.cfg ${PACKAGE_NAME}/conf/zoo.cfg
     ${PACKAGE_NAME}/bin/zkServer.sh start
