@@ -13,6 +13,7 @@ wget http://apache.mirrors.lucidnetworks.net/zookeeper/${PACKAGE_NAME}/${PACKAGE
 tar xvf ${PACKAGE_NAME}.tar.gz || exit 1
 
 if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 ]; then
+    cd ${PACKAGE_NAME}
     ${TRAVIS_SCRIPT_DIR}/init_zk_instances.sh || exit 1
     ${TRAVIS_SCRIPT_DIR}/launch_zk_instances.sh || exit 1
 else
