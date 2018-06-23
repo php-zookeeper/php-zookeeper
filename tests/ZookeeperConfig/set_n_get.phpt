@@ -2,11 +2,10 @@
 ZookeeperConfig::set() & ZookeeperConfig::get()
 --SKIPIF--
 <?php
-if (!extension_loaded('zookeeper')) {
-    echo 'ZooKeeper extension is not loaded'
-}
+if (!extension_loaded('zookeeper'))
+    echo 'skip ZooKeeper extension is not loaded';
 if (!class_exists('ZookeeperConfig'))
-    echo 'Skipping';
+    echo 'skip Class ZookeeperConfig is not defined';
 ?>
 --FILE--
 <?php

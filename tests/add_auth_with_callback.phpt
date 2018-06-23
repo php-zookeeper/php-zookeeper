@@ -2,9 +2,9 @@
 Should add auth and trigger completion callback
 --SKIPIF--
 <?php
-if (!extension_loaded('zookeeper')) {
-    echo 'Zookeeper extension is not loaded'
-};
+if (!extension_loaded('zookeeper'))
+    echo 'skip ZooKeeper extension is not loaded';
+?>
 --FILE--
 <?php
 $fh = fopen('/dev/null', 'w');

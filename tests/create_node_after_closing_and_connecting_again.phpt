@@ -2,9 +2,9 @@
 Should create node after closing and connecting again
 --SKIPIF--
 <?php
-if (!extension_loaded('zookeeper')) {
-    echo 'ZooKeeper extension is not loaded'
-};
+if (!extension_loaded('zookeeper'))
+    echo 'skip ZooKeeper extension is not loaded';
+?>
 --FILE--
 <?php
 $client = new Zookeeper('localhost:2181');
