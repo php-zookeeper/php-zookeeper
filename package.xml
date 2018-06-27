@@ -27,20 +27,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-05-14</date>
+ <date>2018-06-27</date>
  <version>
-  <release>0.5.0</release>
-  <api>0.5.0</api>
+  <release>0.6.0</release>
+  <api>0.6.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>alpha</release>
+  <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Improvements:
-- Add method 'close'
-php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
+- Add class 'ZookeeperConfig'
+- Add method 'getConfig'
+- Drop PHP-5 support
    ]]></notes>
  <contents>
   <dir name="/">
@@ -65,6 +66,13 @@ php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
    <file role='src' name='php_zookeeper_exceptions.c'/>
    <file role='src' name='php_zookeeper_exceptions.h'/>
    <file role='src' name='zookeeper34to35.h'/>
+   <file role='src' name='php_zookeeper_callback.c'/>
+   <file role='src' name='php_zookeeper_callback.h'/>
+   <file role='src' name='php_zookeeper_class.h'/>
+   <file role='src' name='php_zookeeper_config_class.c'/>
+   <file role='src' name='php_zookeeper_config_class.h'/>
+   <file role='src' name='php_zookeeper_stat.c'/>
+   <file role='src' name='php_zookeeper_stat.h'/>
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -81,6 +89,18 @@ php-zookeeper-0.5.x will be the last series which supports PHP 5.x.
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.6.0</release><api>0.6.0</api></version>
+   <date>2018-06-27</date>
+   <notes><![CDATA[
+Improvements:
+- Add class 'ZookeeperConfig'
+- Add method 'getConfig'
+- Drop PHP-5 support
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>stable</release><api>stable</api></stability>
    <version><release>0.5.0</release><api>0.5.0</api></version>
