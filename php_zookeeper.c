@@ -14,8 +14,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $ Id: $ */
-
 /* TODO
  * parse client Id in constructor
  * add version to MINFO
