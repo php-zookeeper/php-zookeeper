@@ -78,7 +78,7 @@ Improvements:
  <dependencies>
   <required>
    <php>
-    <min>5.2.0</min>
+    <min>7.0.0</min>
     <max>7.2.99</max>
    </php>
    <pearinstaller>
