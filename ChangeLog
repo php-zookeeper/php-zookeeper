@@ -8,6 +8,11 @@ Version 0.6.0
 	* Add method 'getConfig'
 	* Drop PHP-5 support
 
+Version 0.5.1
+-------------
+	Others:
+	* Fix warning: implicit declaration of function ‘xxx’ [-Wimplicit-function-declaration]
+
 Version 0.5.0
 -------------
 	Improvements:

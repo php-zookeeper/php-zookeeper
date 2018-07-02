@@ -28,6 +28,7 @@
 #endif
 
 #include <php.h>
+#include <php_ticks.h>
 
 #ifdef ZTS
 #include "TSRM.h"

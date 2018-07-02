@@ -106,6 +106,7 @@ if test "$PHP_ZOOKEEPER" != "no"; then
         AC_DEFINE(HAVE_PTHREAD,1,[ ])
     ])
 
+    AC_DEFINE(THREADED,1,[Must define this constant after zookeeper-3.5.0 to use multi-threaded library])
     PHP_SUBST(ZOOKEEPER_SHARED_LIBADD)
     PHP_NEW_EXTENSION(zookeeper, php_zookeeper.c zoo_lock.c $SESSION_EXTRA_FILES php_zookeeper_exceptions.c php_zookeeper_config_class.c php_zookeeper_stat.c php_zookeeper_callback.c, $ext_shared,,$SESSION_INCLUDES)
 
