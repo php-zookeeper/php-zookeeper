@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef DLL_EXPORT
 #define USE_STATIC_LIB
 #endif
