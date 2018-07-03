@@ -13,7 +13,7 @@ providing group services.
 ## Requirements
 
 * [ZooKeeper C Binding](https://zookeeper.apache.org/) (>= 3.4)
-* [PHP](http://www.php.net/) (>= 5.3)
+* [PHP](http://www.php.net/) (>= 7.0)
 
 ## Install
 
