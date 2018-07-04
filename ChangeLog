@@ -1,6 +1,11 @@
 ZooKeeper Extension Changelog
 
 
+Version 0.6.1
+-------------
+	Others:
+	* Fix symbol conflicts
+
 Version 0.6.0
 -------------
 	Improvements:
