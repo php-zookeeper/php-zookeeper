@@ -3,6 +3,8 @@ ZooKeeper Extension Changelog
 
 Version 0.6.1
 -------------
+	Bugs:
+	* Fix memory leaks
 	Others:
 	* Fix symbol conflicts
 

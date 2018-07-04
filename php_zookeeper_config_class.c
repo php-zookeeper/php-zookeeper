@@ -279,6 +279,7 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
     buffer[buffer_len] = 0;
 
     if (status != ZOK) {
+        efree(buffer);
         php_zk_throw_exception(status TSRMLS_CC);
         return;
     }
@@ -289,6 +290,7 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
 
     /* Length will be returned as -1 if the configuration data is NULL */
     if (buffer_len == -1) {
+        efree(buffer);
         RETURN_NULL();
     }
 
