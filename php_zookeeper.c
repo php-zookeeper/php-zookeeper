@@ -54,7 +54,7 @@
 #include "php_zookeeper_config_class.h"
 #include "php_zookeeper_stat.h"
 #include "php_zookeeper_callback.h"
-#include "zookeeper34to35.h"
+#include "php_zookeeper_log.h"
 
 /****************************************
   Helper macros
@@ -396,7 +396,7 @@ static PHP_METHOD(Zookeeper, get)
 		RETURN_NULL();
 	}
 
-	PHP_ZK_LOG_INFO(i_obj->zk, "path=%s, cb_data=%p", path, cb_data);
+	php_zk_log_info(i_obj->zk, "path=%s, cb_data=%p", path, cb_data);
 
 	buffer = emalloc (length+1);
 	status = zoo_wget(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
@@ -1074,7 +1074,7 @@ static void php_zk_node_watcher_marshal(zhandle_t *zk, int type, int state, cons
 
 void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context)
 {
-	PHP_ZK_LOG_DEBUG(zk, "type=%d, state=%d, path=%s, path(p)=%p, context=%p", type, state, path?path:"", path, context);
+	php_zk_log_debug(zk, "type=%d, state=%d, path=%s, path(p)=%p, context=%p", type, state, path?path:"", path, context);
 
 	php_cb_data_t *cb_data = context;
 
@@ -1120,7 +1120,7 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 
 static void php_zk_completion_marshal(int rc, const void *context)
 {
-	PHP_ZK_LOG_DEBUG(NULL, "rc=%d, context=%p", rc, context);
+	php_zk_log_debug(NULL, "rc=%d, context=%p", rc, context);
 
 	php_cb_data_t *cb_data = (php_cb_data_t *)context;
 
