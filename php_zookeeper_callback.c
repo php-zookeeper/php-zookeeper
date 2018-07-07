@@ -21,7 +21,7 @@
 
 php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC)
 {
-    php_cb_data_t *cbd = ecalloc(sizeof(php_cb_data_t), 1);
+    php_cb_data_t *cbd = ecalloc(1, sizeof(php_cb_data_t));
     cbd->fci = *fci;
     cbd->fcc = *fcc;
     cbd->oneshot = oneshot;
