@@ -388,11 +388,11 @@ static PHP_METHOD(Zookeeper, get)
 	}
 
 	if (length <= 0) {/* znode carries a NULL */
-		/* FIXME: This branch will ignore the callback user provided if znode carries a NULL value */
 		if (stat_info) {
 			php_stat_to_array(&stat, stat_info);
 		}
 
+		php_cb_data_destroy(&cb_data);
 		RETURN_NULL();
 	}
 
@@ -421,6 +421,7 @@ static PHP_METHOD(Zookeeper, get)
 
 	/* Length will be returned as -1 if the znode carries a NULL */
 	if (length == -1) {
+		php_cb_data_destroy(&cb_data);
 		RETURN_NULL();
 	}
 
@@ -836,13 +837,18 @@ PHP_FUNCTION(zookeeper_dispatch)
 /* {{{ constructor/destructor */
 static void php_zk_close(php_zk_t *i_obj TSRMLS_DC)
 {
+	php_cb_data_t *cb_data_p;
+
 	if (i_obj->cb_data) {
+		php_cb_data_destroy(&i_obj->cb_data);
 		i_obj->cb_data = NULL;
 	}
+
 	if (i_obj->zk) {
 		zookeeper_close(i_obj->zk);
 		i_obj->zk = NULL;
 	}
+
 	zend_hash_clean(&i_obj->callbacks);
 }
 
@@ -851,9 +857,7 @@ static void php_zk_destroy(php_zk_t *i_obj TSRMLS_DC)
 	php_zk_close(i_obj TSRMLS_CC);
 	zend_hash_destroy(&i_obj->callbacks);
 
-#ifndef ZEND_ENGINE_3
 	efree(i_obj);
-#endif
 }
 
 static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
@@ -869,7 +873,8 @@ static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
 static void php_cb_data_zv_destroy(zval *entry)
 {
 	if( Z_TYPE_P(entry) == IS_PTR ) {
-		php_cb_data_destroy(Z_PTR_P(entry));
+		php_cb_data_destroy(Z_PTR_P(entry)); // php_cb_data_t
+		efree(Z_PTR_P(entry)); // Allocated by zend_hash_next_index_insert_mem()
 	}
 }
 #endif
@@ -884,7 +889,7 @@ zend_object* php_zk_new(zend_class_entry *ce TSRMLS_DC)
 	object_properties_init(&i_obj->zo, ce);
 	i_obj->zo.handlers = &zookeeper_obj_handlers;
 
-	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 1, 0);
+	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0, 0);
 
 	return &i_obj->zo;
 }
@@ -906,7 +911,7 @@ zend_object_value php_zk_new(zend_class_entry *ce TSRMLS_DC)
 	retval.handle = zend_objects_store_put(i_obj, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t)php_zk_free_storage, NULL TSRMLS_CC);
 	retval.handlers = zend_get_std_object_handlers();
 
-	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_destroy, 1, 0);
+	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_destroy, 0, 0);
 
 	return retval;
 }
