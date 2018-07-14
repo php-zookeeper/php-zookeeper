@@ -2,7 +2,6 @@
 # Run phpt tests
 #
 
-set -e
 set -u
 
 BASENAME=${0}
@@ -22,7 +21,12 @@ ${USE_PHP} \
   run-tests.php -n -d extension_dir=modules -d extension=zookeeper.so ${TEST}
 
 if [ $? -ne 0 ]; then
+    echo
+    echo "====================================================================="
     echo "Dumping diff files ..." >&2
-    find . -name *.diff|xargs cat
+    for f in `find . -name *.diff`; do
+        ${TOOLS_DIR}/dump.sh $f
+    done
+    echo "====================================================================="
     exit 1
 fi
