@@ -27,21 +27,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-06-27</date>
+ <date>2018-07-14</date>
  <version>
-  <release>0.6.0</release>
+  <release>0.6.1</release>
   <api>0.6.0</api>
  </version>
  <stability>
-  <release>alpha</release>
+  <release>beta</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-Improvements:
-- Add class 'ZookeeperConfig'
-- Add method 'getConfig'
-- Drop PHP-5 support
+Bugs:
+- Fix memory leaks
+Others:
+- Fix symbol conflicts
    ]]></notes>
  <contents>
   <dir name="/">
@@ -65,7 +65,6 @@ Improvements:
    <file role='src' name='php5to7.h'/>
    <file role='src' name='php_zookeeper_exceptions.c'/>
    <file role='src' name='php_zookeeper_exceptions.h'/>
-   <file role='src' name='zookeeper34to35.h'/>
    <file role='src' name='php_zookeeper_callback.c'/>
    <file role='src' name='php_zookeeper_callback.h'/>
    <file role='src' name='php_zookeeper_class.h'/>
@@ -73,6 +72,8 @@ Improvements:
    <file role='src' name='php_zookeeper_config_class.h'/>
    <file role='src' name='php_zookeeper_stat.c'/>
    <file role='src' name='php_zookeeper_stat.h'/>
+   <file role='src' name='php_zookeeper_log.c'/>
+   <file role='src' name='php_zookeeper_log.h'/>
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -89,6 +90,18 @@ Improvements:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>beta</release><api>alpha</api></stability>
+   <version><release>0.6.1</release><api>0.6.0</api></version>
+   <date>2018-07-14</date>
+   <notes><![CDATA[
+Bugs:
+- Fix memory leaks
+Others:
+- Fix symbol conflicts
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>alpha</api></stability>
    <version><release>0.6.0</release><api>0.6.0</api></version>
