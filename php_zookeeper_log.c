@@ -36,7 +36,7 @@
 	{								\
 		va_list msg;				\
 		va_start(msg, zh);			\
-		PHP_ZK_LOG_##FUNC(zh, msg);	\
+		PHP_ZK_LOG_##FUNC(zh, va_arg(msg, char*), msg);	\
 		va_end(msg);				\
 	}
 
