@@ -1,6 +1,11 @@
 ZooKeeper Extension Changelog
 
 
+Version 0.6.2
+-------------
+	Bugs:
+	* Fix 'undefined symbol: zoo_wgetconfig' on Fedora (Issue #22)
+
 Version 0.6.1
 -------------
 	Bugs:
