@@ -106,13 +106,17 @@ if test "$PHP_ZOOKEEPER" != "no"; then
         AC_DEFINE(HAVE_PTHREAD,1,[ ])
     ])
 
-    ZOO_MINOR_VERSION=$(cat ${PHP_LIBZOOKEEPER_INCDIR}/zookeeper/zookeeper_version.h |grep ZOO_MINOR_VERSION|awk '{print $3}')
+    AC_MSG_CHECKING([whether ZooKeeper Config is enabled])
+    ZOO_MINOR_VERSION=$(cat ${PHP_LIBZOOKEEPER_INCDIR}/zookeeper_version.h |grep ZOO_MINOR_VERSION|awk '{print $3}')
     PHP_ZOOKEEPER_CONFIG_FILES=""
     if test ${ZOO_MINOR_VERSION} -eq 5; then
       PHP_ZOOKEEPER_CONFIG_FILES="php_zookeeper_config_class.c"
-      AC_DEFINE(THREADED,1,[Must define this constant after zookeeper-3.5.0 to use multi-threaded library])
+      AC_MSG_RESULT([enabled])
+    else
+      AC_MSG_RESULT([disabled])
     fi
 
+    AC_DEFINE(THREADED,1,[Must define this constant after zookeeper-3.5.0 to use multi-threaded library])
     PHP_SUBST(ZOOKEEPER_SHARED_LIBADD)
     PHP_NEW_EXTENSION(zookeeper, php_zookeeper.c zoo_lock.c $SESSION_EXTRA_FILES php_zookeeper_exceptions.c ${PHP_ZOOKEEPER_CONFIG_FILES} php_zookeeper_stat.c php_zookeeper_callback.c php_zookeeper_log.c, $ext_shared,,$SESSION_INCLUDES)
 
