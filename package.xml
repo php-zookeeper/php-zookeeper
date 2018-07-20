@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-07-14</date>
+ <date>2018-07-20</date>
  <version>
-  <release>0.6.1</release>
+  <release>0.6.2</release>
   <api>0.6.0</api>
  </version>
  <stability>
@@ -39,9 +39,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix memory leaks
-Others:
-- Fix symbol conflicts
+- Fix 'undefined symbol: zoo_wgetconfig' on Fedora (Issue #22)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -90,6 +88,16 @@ Others:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>beta</release><api>alpha</api></stability>
+   <version><release>0.6.2</release><api>0.6.0</api></version>
+   <date>2018-07-20</date>
+   <notes><![CDATA[
+Bugs:
+- Fix 'undefined symbol: zoo_wgetconfig' on Fedora (Issue #22)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.6.1</release><api>0.6.0</api></version>
