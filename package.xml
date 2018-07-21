@@ -27,7 +27,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-07-20</date>
+ <date>2018-07-21</date>
  <version>
   <release>0.6.2</release>
   <api>0.6.0</api>
@@ -91,7 +91,7 @@ Bugs:
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.6.2</release><api>0.6.0</api></version>
-   <date>2018-07-20</date>
+   <date>2018-07-21</date>
    <notes><![CDATA[
 Bugs:
 - Fix 'undefined symbol: zoo_wgetconfig' with libzookeeper < 3.5 (Issue #22)
