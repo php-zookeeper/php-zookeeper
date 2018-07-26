@@ -2,6 +2,7 @@
 Should add auth and trigger completion callback
 --SKIPIF--
 <?php
+// vim: set ts=4 sts=4 sw=4 noet:
 if (!extension_loaded('zookeeper'))
 	echo 'skip ZooKeeper extension is not loaded';
 ?>
@@ -16,9 +17,10 @@ echo $client->addAuth('test', 'test', function() use(&$cbTriggered) {
 	$cbTriggered = true;
 }), PHP_EOL;
 
-for ($i=0; $i<3 && !$cbTriggered; ++$i) {
+for ($i=0; $i<10 && !$cbTriggered; ++$i) {
 	usleep(100000);
-	zookeeper_dispatch();
+	if (version_compare(PHP_VERSION, "7.1.0") < 0)
+		zookeeper_dispatch();
 }
 ?>
 --EXPECT--
