@@ -1,6 +1,11 @@
 ZooKeeper Extension Changelog
 
 
+Version 0.6.3
+-------------
+	Bugs:
+	* Correct exception message (From "Failed to connect to Zookeeper" to "Failed to initialize ZooKeeper ...", Issue #29)
+
 Version 0.6.2
 -------------
 	Bugs:

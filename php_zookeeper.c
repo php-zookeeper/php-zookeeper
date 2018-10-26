@@ -167,7 +167,7 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 						recv_timeout, 0, cb_data, 0);
 
 	if (zk == NULL) {
-		php_zk_throw_exception(PHPZK_CONNECTION_FAILURE TSRMLS_CC);
+		php_zk_throw_exception(PHPZK_INITIALIZATION_FAILURE TSRMLS_CC);
 		/* not reached */
 #ifndef ZEND_ENGINE_3
 		ZVAL_NULL(object);

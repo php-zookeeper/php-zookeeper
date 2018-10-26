@@ -28,7 +28,7 @@ zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char 
  */
 void php_zk_throw_exception(int zk_status TSRMLS_DC);
 
-#define PHPZK_CONNECTION_FAILURE 5999
+#define PHPZK_INITIALIZATION_FAILURE 5999
 #define PHPZK_CONNECT_NOT_CALLED 5998
 
 #endif  /* PHP_ZOOKEEPER_EXCEPTIONS */

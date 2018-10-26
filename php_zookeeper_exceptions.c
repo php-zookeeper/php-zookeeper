@@ -73,9 +73,9 @@ void php_zk_throw_exception(int zk_status TSRMLS_DC)
 	char *message = NULL;
 
 	switch(zk_status) {
-		case PHPZK_CONNECTION_FAILURE:
+		case PHPZK_INITIALIZATION_FAILURE:
 			ce = zk_connection_exception;
-			message = "Failed to connect to Zookeeper";
+			message = "Failed to initialize ZooKeeper C Client, perhaps not enough memory.";
 			break;
 		case PHPZK_CONNECT_NOT_CALLED:
 			ce = zk_connection_exception;
