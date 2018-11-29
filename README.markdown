@@ -10,29 +10,63 @@ ZooKeeper is an Apache project that enables centralized service for maintaining
 configuration information, naming, providing distributed synchronization, and
 providing group services.
 
+
+
 ## Requirements
 
-* [ZooKeeper C Binding](https://zookeeper.apache.org/) (>= 3.4)
-* [PHP](http://www.php.net/) (>= 7.0)
+- [ZooKeeper C Binding](https://zookeeper.apache.org/) (>= 3.4)
+- [PHP](http://www.php.net/) (>= 7.0)
+
+
 
 ## Install
 
-    $ phpize
-    $ ./configure --with-libzookeeper-dir=/path/to/zookeeper-c-binding
-    $ make
-    $ make install
+```shell
+$ phpize
+$ ./configure --with-libzookeeper-dir=/path/to/zookeeper-c-binding
+$ make
+$ make install
+```
+
+
 
 ## Examples
 
-    <?php
-    $zc = new Zookeeper();
-    $zc->connect('localhost:2181');
-    var_dump($zc->get('/zookeeper'));
-    ?>
+```php
+<?php
+$zc = new Zookeeper();
+$zc->connect('localhost:2181');
+var_dump($zc->get('/zookeeper'));
+?>
+```
+
+
+
+## Working with other extensions
+
+### 1.Swoole
+
+```php
+Swoole\Async::set([
+    'enable_signalfd' => false, // See: https://github.com/swoole/swoole-src/issues/302
+]);
+
+$zk = new Zookeeper('localhost:2181');
+
+Swoole\Process::signal(SIGTERM, function() {
+        echo "TERM" . PHP_EOL;
+        Swoole\Event::exit();
+    });
+Swoole\Event::wait();
+```
+
+
 
 ## Resources
- * [Document](https://secure.php.net/manual/en/book.zookeeper.php)
- * [PECL Page](https://pecl.php.net/package/zookeeper)
- * [Zookeeper](https://zookeeper.apache.org/)
- * [PHP Zookeeper Recipes](https://github.com/Gutza/php-zookeeper-recipes)
- * [PHP Zookeeper Admin](https://github.com/Timandes/zookeeper-admin)
+
+- [Document](https://secure.php.net/manual/en/book.zookeeper.php)
+- [PECL Page](https://pecl.php.net/package/zookeeper)
+- [Zookeeper](https://zookeeper.apache.org/)
+- [PHP Zookeeper Recipes](https://github.com/Gutza/php-zookeeper-recipes)
+- [PHP Zookeeper Admin](https://github.com/Timandes/zookeeper-admin)
+
