@@ -21,11 +21,23 @@ providing group services.
 
 ## Install
 
+### 1.Compile ZooKeeper C Binding
+
+```shell
+$ ./configure --prefix=/path/to/zookeeper-c-binding
+$ make
+$ sudo make install
+```
+
+
+
+### 2.Compile PHP ZooKeeper Extension
+
 ```shell
 $ phpize
 $ ./configure --with-libzookeeper-dir=/path/to/zookeeper-c-binding
 $ make
-$ make install
+$ sudo make install
 ```
 
 
