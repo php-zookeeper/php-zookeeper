@@ -74,6 +74,12 @@ Swoole\Event::wait();
 
 
 
+## For Developers
+
+* Install [EditorConfig](https://editorconfig.org/) to your IDE.
+
+
+
 ## Resources
 
 - [Document](https://secure.php.net/manual/en/book.zookeeper.php)
