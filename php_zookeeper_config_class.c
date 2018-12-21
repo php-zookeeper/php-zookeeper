@@ -31,6 +31,8 @@ typedef struct {
     zend_object    zo;
 } php_zk_conf_t;
 
+zend_class_entry *php_zk_config_ce;
+
 static zend_object_handlers php_zk_conf_obj_handlers;
 
 static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj);

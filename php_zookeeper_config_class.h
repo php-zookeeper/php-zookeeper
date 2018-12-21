@@ -17,7 +17,7 @@
 #ifndef PHP_ZOOKEEPER_CONFIG_CLASS
 #define PHP_ZOOKEEPER_CONFIG_CLASS
 
-zend_class_entry *php_zk_config_ce;
+extern zend_class_entry *php_zk_config_ce;
 
 void php_zk_config_register(TSRMLS_D);
 zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk TSRMLS_DC);
