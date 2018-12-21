@@ -4,6 +4,7 @@
 .deps
 .idea
 .libs
+.vscode
 CMakeLists.txt
 Makefile
 Makefile.fragments
@@ -24,6 +25,7 @@ config.status
 config.sub
 configure
 configure.in
+configure.ac
 conftest
 conftest.c
 include
@@ -53,10 +55,16 @@ cscope.out
 .vagrant
 coverage.info
 tests/*.exp
+tests/*/*.exp
 tests/*.diff
+tests/*/*.diff
 tests/*.log
+tests/*/*.log
 tests/*.out
+tests/*/*.out
 tests/*.php
+tests/*/*.php
 tests/*.sh
+tests/*/*.sh
 tmp-php.ini
 reports/
