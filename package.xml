@@ -27,19 +27,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2018-07-21</date>
+ <date>2019-01-23</date>
  <version>
-  <release>0.6.2</release>
+  <release>0.6.3</release>
   <api>0.6.0</api>
  </version>
  <stability>
-  <release>beta</release>
+  <release>stable</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Fix 'undefined symbol: zoo_wgetconfig' with libzookeeper < 3.5 (Issue #22)
+- Correct exception message (From "Failed to connect to Zookeeper" to "Failed to initialize ZooKeeper ...", Issue #29)
+- Fix 'duplicate symbol _php_zk_config_ce'
+- Fix segmentation fault when destroying Zookeeper instance (GH PR #31)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -88,6 +90,18 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>stable</release><api>alpha</api></stability>
+   <version><release>0.6.3</release><api>0.6.0</api></version>
+   <date>2019-01-23</date>
+   <notes><![CDATA[
+Bugs:
+- Correct exception message (From "Failed to connect to Zookeeper" to "Failed to initialize ZooKeeper ...", Issue #29)
+- Fix 'duplicate symbol _php_zk_config_ce'
+- Fix segmentation fault when destroying Zookeeper instance (GH PR #31)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.6.2</release><api>0.6.0</api></version>
