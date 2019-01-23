@@ -21,7 +21,6 @@
 
 #include "SAPI.h"
 
-#include "php5to7.h"
 #include "php_zookeeper.h"
 #include "php_zookeeper_private.h"
 #include "php_zookeeper_session.h"

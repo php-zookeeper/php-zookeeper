@@ -45,7 +45,6 @@
 #include <ext/standard/php_smart_string.h>
 #endif
 
-#include "php5to7.h"
 #include "php_zookeeper.h"
 #include "php_zookeeper_private.h"
 #include "php_zookeeper_session.h"
@@ -70,6 +69,8 @@
 		php_zk_throw_exception(PHPZK_CONNECT_NOT_CALLED TSRMLS_CC); \
 		return;	\
 	} \
+
+#define Z_ZK_P(zv) php_zk_fetch_object(Z_OBJ_P((zv)))
 
 /****************************************
   Structures and definitions
@@ -183,7 +184,7 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
    Connects to a zookeeper host */
 static PHP_METHOD(Zookeeper, connect)
 {
-	strsize_t host_len;
+	size_t host_len;
 	char *host;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -203,7 +204,7 @@ static PHP_METHOD(Zookeeper, connect)
 static PHP_METHOD(Zookeeper, __construct)
 {
 	zval *object = getThis();
-	strsize_t host_len = 0;
+	size_t host_len = 0;
 	char *host = NULL;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
@@ -230,7 +231,7 @@ static PHP_METHOD(Zookeeper, __construct)
 static PHP_METHOD(Zookeeper, create)
 {
 	char *path, *value = NULL;
-	strsize_t path_len, value_len;
+	size_t path_len, value_len;
 	zval *acl_info = NULL;
 	long flags = 0;
 	char *realpath;
@@ -267,7 +268,7 @@ static PHP_METHOD(Zookeeper, create)
 		return;
 	}
 
-	PHP5TO7_RETVAL_STRING(realpath);
+	RETVAL_STRING(realpath);
 	efree(realpath);
 }
 /* }}} */
@@ -277,7 +278,7 @@ static PHP_METHOD(Zookeeper, create)
 static PHP_METHOD(Zookeeper, delete)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	long version = -1;
 	int status = ZOK;
 
@@ -305,7 +306,7 @@ static PHP_METHOD(Zookeeper, delete)
 static PHP_METHOD(Zookeeper, getChildren)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	php_cb_data_t *cb_data = NULL;
@@ -334,7 +335,7 @@ static PHP_METHOD(Zookeeper, getChildren)
 
 	array_init(return_value);
 	for (i = 0; i < strings.count; i++) {
-		php5to7_add_next_index_string(return_value, strings.data[i]);
+		add_next_index_string(return_value, strings.data[i]);
 	}
     deallocate_String_vector(&strings);
 }
@@ -345,7 +346,7 @@ static PHP_METHOD(Zookeeper, getChildren)
 static PHP_METHOD(Zookeeper, get)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	zval *stat_info = NULL;
@@ -425,7 +426,7 @@ static PHP_METHOD(Zookeeper, get)
 		RETURN_NULL();
 	}
 
-	PHP5TO7_RETVAL_STRINGL(buffer, length);
+	RETVAL_STRINGL(buffer, length);
 	efree(buffer);
 }
 /* }}} */
@@ -435,7 +436,7 @@ static PHP_METHOD(Zookeeper, get)
 static PHP_METHOD(Zookeeper, exists)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	php_cb_data_t *cb_data = NULL;
@@ -475,7 +476,7 @@ static PHP_METHOD(Zookeeper, exists)
 static PHP_METHOD(Zookeeper, set)
 {
 	char *path, *value = NULL;
-	strsize_t path_len, value_len;
+	size_t path_len, value_len;
 	long version = -1;
 	zval *stat_info = NULL;
 	struct Stat stat, *stat_ptr = NULL;
@@ -529,7 +530,7 @@ static PHP_METHOD(Zookeeper, getClientId)
 	cid = zoo_client_id(i_obj->zk);
 	array_init(return_value);
 	add_next_index_long(return_value, cid->client_id);
-	php5to7_add_next_index_string(return_value, (char *)cid->passwd);
+	add_next_index_string(return_value, (char *)cid->passwd);
 }
 /* }}} */
 
@@ -538,7 +539,7 @@ static PHP_METHOD(Zookeeper, getClientId)
 static PHP_METHOD(Zookeeper, getAcl)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	int status = ZOK;
 	struct ACL_vector aclv;
 	struct Stat stat;
@@ -580,7 +581,7 @@ static PHP_METHOD(Zookeeper, getAcl)
 static PHP_METHOD(Zookeeper, setAcl)
 {
 	char *path;
-	strsize_t path_len;
+	size_t path_len;
 	long version;
 	zval *acl_info;
 	struct ACL_vector aclv;
@@ -691,7 +692,7 @@ static PHP_METHOD(Zookeeper, setDeterministicConnOrder)
 static PHP_METHOD(Zookeeper, addAuth)
 {
 	char *scheme, *cert;
-	strsize_t scheme_len, cert_len;
+	size_t scheme_len, cert_len;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	int status = ZOK;
@@ -924,7 +925,7 @@ static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int sta
 
 	ZVAL_LONG(&params[0], type);
 	ZVAL_LONG(&params[1], state);
-	PHP5TO7_ZVAL_STRING(&params[2], (char *)path);
+	ZVAL_STRING(&params[2], (char *)path);
 
 	cb_data->fci.retval = &retval;
 #else
@@ -940,7 +941,7 @@ static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int sta
 
 	ZVAL_LONG(z_type, type);
 	ZVAL_LONG(z_state, state);
-	PHP5TO7_ZVAL_STRING(z_path, (char *)path);
+	ZVAL_STRING(z_path, (char *)path);
 
 	params[0] = &z_type;
 	params[1] = &z_state;
@@ -1268,9 +1269,9 @@ static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array)
 		MAKE_STD_ZVAL(entry);
 #endif
 		array_init(entry);
-		add_assoc_long_ex(entry, PHP5TO7_STRS("perms"), aclv->data[i].perms);
-		php5to7_add_assoc_string_ex(entry, PHP5TO7_STRS("scheme"), aclv->data[i].id.scheme);
-		php5to7_add_assoc_string_ex(entry, PHP5TO7_STRS("id"), aclv->data[i].id.id);
+		add_assoc_long_ex(entry, ZEND_STRL("perms"), aclv->data[i].perms);
+		add_assoc_string_ex(entry, ZEND_STRL("scheme"), aclv->data[i].id.scheme);
+		add_assoc_string_ex(entry, ZEND_STRL("id"), aclv->data[i].id.id);
 		add_next_index_zval(array, entry);
 	}
 }

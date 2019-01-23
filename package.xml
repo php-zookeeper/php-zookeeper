@@ -62,7 +62,6 @@ Bugs:
    <file role='src' name='php_zookeeper_session.h'/>
    <file role='src' name='zoo_lock.c'/>
    <file role='src' name='zoo_lock.h'/>
-   <file role='src' name='php5to7.h'/>
    <file role='src' name='php_zookeeper_exceptions.c'/>
    <file role='src' name='php_zookeeper_exceptions.h'/>
    <file role='src' name='php_zookeeper_callback.c'/>

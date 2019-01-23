@@ -20,7 +20,6 @@
 
 #include <php.h>
 
-#include "php5to7.h"
 #include "php_zookeeper_class.h"
 #include "php_zookeeper_exceptions.h"
 #include "php_zookeeper_config_class.h"
@@ -110,7 +109,7 @@ static PHP_METHOD(ZookeeperConfig, get)
         RETURN_NULL();
     }
 
-    PHP5TO7_RETVAL_STRINGL(buffer, length);
+    RETVAL_STRINGL(buffer, length);
     efree(buffer);
 }
 /* }}} */
@@ -121,7 +120,7 @@ static PHP_METHOD(ZookeeperConfig, get)
 static PHP_METHOD(ZookeeperConfig, set)
 {
     char *members;
-    strsize_t members_len;
+    size_t members_len;
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
@@ -140,7 +139,7 @@ static PHP_METHOD(ZookeeperConfig, set)
 static PHP_METHOD(ZookeeperConfig, add)
 {
     char *members;
-    strsize_t members_len;
+    size_t members_len;
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
@@ -159,7 +158,7 @@ static PHP_METHOD(ZookeeperConfig, add)
 static PHP_METHOD(ZookeeperConfig, remove)
 {
     char *members;
-    strsize_t members_len;
+    size_t members_len;
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
@@ -233,7 +232,7 @@ void php_zk_config_register(TSRMLS_D)
     zend_class_entry ce;
 
     INIT_CLASS_ENTRY(ce, "ZookeeperConfig", zookeeper_config_class_methods);
-    php_zk_config_ce = php5to7_register_internal_class_ex(&ce, NULL);
+    php_zk_config_ce = zend_register_internal_class_ex(&ce, NULL);
     php_zk_config_ce->create_object = php_zk_config_new;
 
     memcpy(&php_zk_conf_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -296,6 +295,6 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
         RETURN_NULL();
     }
 
-    PHP5TO7_RETVAL_STRINGL(buffer, buffer_len);
+    RETVAL_STRINGL(buffer, buffer_len);
     efree(buffer);
 }
