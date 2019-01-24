@@ -21,15 +21,10 @@
 #include "php_zookeeper_callback.h"
 
 typedef struct {
-#if PHP_MAJOR_VERSION < 7
-    zend_object    zo;
-#endif
     zhandle_t     *zk;
     php_cb_data_t *cb_data;
     HashTable callbacks;
-#if PHP_MAJOR_VERSION >= 7
     zend_object    zo;
-#endif
 } php_zk_t;
 
 void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path, void *context);

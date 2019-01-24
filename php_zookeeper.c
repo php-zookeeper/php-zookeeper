@@ -39,11 +39,7 @@
 #include <ext/standard/info.h>
 #include <zend_extensions.h>
 
-#if PHP_MAJOR_VERSION < 7
-#include <ext/standard/php_smart_str.h>
-#else
 #include <ext/standard/php_smart_string.h>
-#endif
 
 #include "php_zookeeper.h"
 #include "php_zookeeper_private.h"
@@ -84,14 +80,6 @@ static pthread_mutex_t cb_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef HAVE_ZOOKEEPER_SESSION
 static int le_zookeeper_connection;
-#endif
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
-const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0, NULL, NULL, 0 };
-#undef ZEND_BEGIN_ARG_INFO_EX
-#define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)   \
-    static zend_arg_info name[] = {                                                                       \
-        { NULL, 0, NULL, 0, 0, 0, pass_rest_by_reference, return_reference, required_num_args },
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(zookeeper)
