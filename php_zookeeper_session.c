@@ -35,26 +35,6 @@
 
 #define PHP_ZK_SESS_LOCK_EXPIRATION 30
 
-#ifndef ZEND_ENGINE_3
-typedef zend_rsrc_list_entry zend_resource;
-static inline void *zend_hash_str_update_mem(HashTable *ht, const char *str, size_t len, void *pData, size_t size)
-{
-	void *pDest;
-	if (zend_hash_update(ht, str, len, pData, size, &pDest) == FAILURE) {
-		return NULL;
-	}
-	return pDest;
-}
-static inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
-{
-	void *pData;
-	if (zend_hash_find(ht, str, len, &pData) == FAILURE) {
-		return NULL;
-	}
-	return pData;
-}
-#endif
-
 ps_module ps_mod_zookeeper = {
 	PS_MOD(zookeeper)
 };
@@ -107,9 +87,6 @@ static php_zookeeper_session *php_zookeeper_session_get(char *save_path TSRMLS_D
 	zend_resource le, *le_p = NULL;
 
 	plist_key_len  = spprintf(&plist_key, 0, "zk-conn:[%s]", save_path);
-#ifndef ZEND_ENGINE_3
-	plist_key_len += 1;
-#endif
 
 	le_p = zend_hash_str_find_ptr(&EG(persistent_list), plist_key, plist_key_len);
 	if (le_p) {
@@ -196,11 +173,7 @@ static zend_bool php_zookeeper_sess_lock(php_zookeeper_session *session, const c
 */
 PS_READ_FUNC(zookeeper)
 {
-#ifdef ZEND_ENGINE_3
 #define SESSKEY ZSTR_VAL(key)
-#else
-#define SESSKEY key
-#endif
 	ZK_SESS_DATA;
 	int status, path_len;
 	struct Stat stat;
@@ -256,22 +229,12 @@ PS_READ_FUNC(zookeeper)
 		return FAILURE;
 	}
 
-#ifdef ZEND_ENGINE_3
 	*val = zend_string_init(rbuf, rbuf_len, 0);
 	efree(rbuf);
-#else
-	*val = rbuf;
-	*vallen = rbuf_len;
-#endif
 
 	return SUCCESS;
 error:
-#ifdef ZEND_ENGINE_3
 	*val = ZSTR_EMPTY_ALLOC();
-#else
-	*val    = NULL;
-	*vallen = 0;
-#endif
 	return SUCCESS; //FAILURE;
 #undef SESSKEY
 }
@@ -281,13 +244,8 @@ error:
 */
 PS_WRITE_FUNC(zookeeper)
 {
-#ifdef ZEND_ENGINE_3
 #define WBUF ZSTR_VAL(val)
 #define WBUFLEN ZSTR_LEN(val)
-#else
-#define WBUF val
-#define WBUFLEN vallen
-#endif
 
 	ZK_SESS_DATA;
 	int status, retry_count;

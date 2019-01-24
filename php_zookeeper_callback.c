@@ -26,15 +26,8 @@ php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_i
     cbd->fcc = *fcc;
     cbd->oneshot = oneshot;
     cbd->h = ht->nNextFreeElement;
-#ifdef ZEND_ENGINE_3
     Z_TRY_ADDREF(cbd->fci.function_name);
     zend_hash_next_index_insert_mem(ht, (void*)&cbd, sizeof(php_cb_data_t *));
-#else
-    if( cbd->fci.function_name ) {
-        Z_ADDREF_P(cbd->fci.function_name);
-    }
-    zend_hash_next_index_insert(ht, (void*)&cbd, sizeof(php_cb_data_t *), NULL);
-#endif
     cbd->ht = ht;
 #if ZTS
     TSRMLS_SET_CTX(cbd->ctx);
@@ -46,13 +39,7 @@ void php_cb_data_destroy(php_cb_data_t **entry)
 {
     php_cb_data_t *cbd = *(php_cb_data_t **)entry;
     if (cbd) {
-#ifdef ZEND_ENGINE_3
         Z_TRY_DELREF(cbd->fci.function_name);
-#else
-        if( cbd->fci.function_name ) {
-            Z_DELREF_P(cbd->fci.function_name);
-        }
-#endif
         efree(cbd);
     }
 }

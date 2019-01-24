@@ -23,9 +23,7 @@ void php_stat_to_array(const struct Stat *stat, zval *array)
         return;
     }
     if( Z_TYPE_P(array) != IS_ARRAY ) {
-#ifdef ZEND_ENGINE_3
         zval_ptr_dtor(array);
-#endif
         array_init(array);
     }
 
