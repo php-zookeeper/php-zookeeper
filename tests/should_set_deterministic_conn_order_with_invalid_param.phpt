@@ -10,4 +10,4 @@ if (!extension_loaded('zookeeper'))
 $client = new Zookeeper('localhost:2181');
 $client->setDeterministicConnOrder(array());
 --EXPECTF--
-Warning: Zookeeper::setDeterministicConnOrder() expects parameter %d to be boolean, array given in %s on line %d
+Warning: Zookeeper::setDeterministicConnOrder() expects parameter %d to be boo%s, array given in %s on line %d
