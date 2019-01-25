@@ -82,7 +82,6 @@ Swoole\Event::wait();
 
 * master: Main branch.
 * 0.5.x: The last branch which still supports PHP 5.x.
-* zend-engine-3: Feature branch which aims to remove compatible fragments with Zend Engine 2.
 
 
 
