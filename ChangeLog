@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 0.7.0
+-------------
+	Improvements:
+	* Drop PHP-5 support (Issue #14)
+	* Fix segmentation fault found in PHP 7.3
 
 Version 0.6.3
 -------------

@@ -25,7 +25,9 @@ void php_stat_to_array(const struct Stat *stat, zval *array)
     if( Z_TYPE_P(array) != IS_ARRAY ) {
         zval_ptr_dtor(array);
         array_init(array);
-    }
+    } else {
+		SEPARATE_ARRAY(array);
+	}
 
     add_assoc_double_ex(array, ZEND_STRL("czxid"), stat->czxid);
     add_assoc_double_ex(array, ZEND_STRL("mzxid"), stat->mzxid);
