@@ -3,6 +3,7 @@ ZooKeeper Extension Changelog
 Version 0.7.0
 -------------
 	Improvements:
+	* Make parameter 'acls' of method 'create' optional
 	* Drop PHP-5 support (Issue #14)
 	* Fix segmentation fault found in PHP 7.3
 

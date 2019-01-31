@@ -96,6 +96,7 @@ static void php_zk_completion_marshal(int rc, const void *context);
 static void php_parse_acl_list(zval *z_acl, struct ACL_vector *aclv);
 static void php_aclv_destroy(struct ACL_vector *aclv);
 static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array);
+static void php_init_default_acl_info_array(zval *array);
 static void php_zk_dispatch();
 static void php_zk_close(php_zk_t *i_obj TSRMLS_DC);
 
@@ -207,7 +208,7 @@ static PHP_METHOD(Zookeeper, create)
 {
 	char *path, *value = NULL;
 	size_t path_len, value_len;
-	zval *acl_info = NULL;
+	zval *acl_info = NULL, default_acl_info = {0};
 	long flags = 0;
 	char *realpath;
 	int realpath_max = 0;
@@ -215,9 +216,15 @@ static PHP_METHOD(Zookeeper, create)
 	int status = ZOK;
 	ZK_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss!a!|l", &path, &path_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss!|a!l", &path, &path_len,
 							  &value, &value_len, &acl_info, &flags) == FAILURE) {
 		return;
+	}
+
+	if (!acl_info) {
+		// Initialize default acl_info array
+		php_init_default_acl_info_array(&default_acl_info);
+		acl_info = &default_acl_info;
 	}
 
 	ZK_METHOD_FETCH_OBJECT;
@@ -1117,6 +1124,19 @@ static void php_aclv_to_array(const struct ACL_vector *aclv, zval *array)
 		add_assoc_string_ex(entry, ZEND_STRL("id"), aclv->data[i].id.id);
 		add_next_index_zval(array, entry);
 	}
+}
+
+static void php_init_default_acl_info_array(zval *array)
+{
+	zval acl_entry;
+
+	array_init(&acl_entry);
+	add_assoc_long_ex(&acl_entry, ZEND_STRL("perms"), ZOO_PERM_ALL);
+	add_assoc_string_ex(&acl_entry, ZEND_STRL("scheme"), "world");
+	add_assoc_string_ex(&acl_entry, ZEND_STRL("id"), "anyone");
+
+	array_init(array);
+	add_next_index_zval(array, &acl_entry);
 }
 /* }}} */
 

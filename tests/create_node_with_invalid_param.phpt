@@ -10,4 +10,4 @@ if (!extension_loaded('zookeeper'))
 $client = new Zookeeper('localhost:2181');
 $client->create('/test5', array());
 --EXPECTF--
-Warning: Zookeeper::create() expects at least %d parameters, %d given in %s on line %d
+Warning: Zookeeper::create() expects parameter 2 to be string, array given in %s on line %d
