@@ -249,7 +249,7 @@ zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk TS
 {
     php_zk_conf_t *i_obj;
 
-    i_obj = ecalloc(1, sizeof(*i_obj));
+    i_obj = ecalloc(1, sizeof(php_zk_conf_t) + zend_object_properties_size(ce));
     zend_object_std_init(&i_obj->zo, ce TSRMLS_CC);
     object_properties_init(&i_obj->zo, ce);
     i_obj->zo.handlers = &php_zk_conf_obj_handlers;

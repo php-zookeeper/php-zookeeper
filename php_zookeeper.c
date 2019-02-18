@@ -855,6 +855,7 @@ zend_object* php_zk_new(zend_class_entry *ce TSRMLS_DC)
 
 	i_obj = ecalloc(1, sizeof(php_zk_t) + zend_object_properties_size(ce));
 	zend_object_std_init( &i_obj->zo, ce TSRMLS_CC );
+	object_properties_init(&i_obj->zo, ce);
 	i_obj->zo.handlers = &zookeeper_obj_handlers;
 
 	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0, 0);
