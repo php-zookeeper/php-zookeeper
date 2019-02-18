@@ -771,6 +771,14 @@ static PHP_METHOD(Zookeeper, close)
 }
 /* }}} */
 
+/* {{{ Zookeeper::dispatch ( .. )
+	Calls callbacks for pending operations */
+static PHP_METHOD(Zookeeper, dispatch)
+{
+	php_zk_dispatch();
+}
+/* }}} */
+
 #if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
 /* {{{ Zookeeper::getConfig( .. )
    */
@@ -1244,6 +1252,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_close, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_dispatch, 0)
+ZEND_END_ARG_INFO()
+
 #if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
 ZEND_BEGIN_ARG_INFO(arginfo_getConfig, 0)
 ZEND_END_ARG_INFO()
@@ -1281,6 +1292,8 @@ static zend_function_entry zookeeper_class_methods[] = {
 	ZK_ME(setLogStream,       arginfo_setLogStream)
 
 	ZK_ME(close,              arginfo_close)
+
+	ZK_ME_STATIC(dispatch,    arginfo_dispatch)
 
 #if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
 	ZK_ME(getConfig,          arginfo_getConfig)
