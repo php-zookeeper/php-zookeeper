@@ -27,21 +27,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2019-01-23</date>
+ <date>2019-02-27</date>
  <version>
-  <release>0.6.3</release>
-  <api>0.6.0</api>
+  <release>0.7.0</release>
+  <api>0.7.0</api>
  </version>
  <stability>
-  <release>stable</release>
+  <release>alpha</release>
   <api>alpha</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
+Improvements:
+- Make parameter 'acls' of method 'create' optional
+- Add static method 'dispatch'
+- Drop PHP-5 support (Issue #14)
 Bugs:
-- Correct exception message (From "Failed to connect to Zookeeper" to "Failed to initialize ZooKeeper ...", Issue #29)
-- Fix 'duplicate symbol _php_zk_config_ce'
-- Fix segmentation fault when destroying Zookeeper instance (GH PR #31)
+- Fix segmentation fault found in PHP 7.3
    ]]></notes>
  <contents>
   <dir name="/">
@@ -79,7 +81,7 @@ Bugs:
   <required>
    <php>
     <min>7.0.0</min>
-    <max>7.3.99</max>
+    <max>7.4.99</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -89,6 +91,20 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.7.0</release><api>0.7.0</api></version>
+   <date>2019-02-27</date>
+   <notes><![CDATA[
+Improvements:
+- Make parameter 'acls' of method 'create' optional
+- Add static method 'dispatch'
+- Drop PHP-5 support (Issue #14)
+Bugs:
+- Fix segmentation fault found in PHP 7.3
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>stable</release><api>alpha</api></stability>
    <version><release>0.6.3</release><api>0.6.0</api></version>
