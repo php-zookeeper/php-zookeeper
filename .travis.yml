@@ -7,7 +7,7 @@ php:
 
 env:
     - LIBZOOKEEPER_VERSION=3.5.4-beta
-    - LIBZOOKEEPER_VERSION=3.4.12
+    - LIBZOOKEEPER_VERSION=3.4.13
 
 addons:
   apt:
