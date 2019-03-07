@@ -828,8 +828,6 @@ static void php_zk_destroy(php_zk_t *i_obj TSRMLS_DC)
 {
 	php_zk_close(i_obj TSRMLS_CC);
 	zend_hash_destroy(&i_obj->callbacks);
-
-	efree(i_obj);
 }
 
 static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
