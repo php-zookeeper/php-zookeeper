@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2019-02-27</date>
+ <date>2019-03-08</date>
  <version>
-  <release>0.7.0</release>
+  <release>0.7.1</release>
   <api>0.7.0</api>
  </version>
  <stability>
@@ -38,12 +38,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-Improvements:
-- Make parameter 'acls' of method 'create' optional
-- Add static method 'dispatch'
-- Drop PHP-5 support (Issue #14)
 Bugs:
-- Fix segmentation fault found in PHP 7.3
+- Fix segmentation fault after destroying Zookeeper instance (Issue #32)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -91,6 +87,16 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>alpha</api></stability>
+   <version><release>0.7.1</release><api>0.7.0</api></version>
+   <date>2019-03-08</date>
+   <notes><![CDATA[
+Bugs:
+- Fix segmentation fault after destroying Zookeeper instance (Issue #32)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>alpha</api></stability>
    <version><release>0.7.0</release><api>0.7.0</api></version>
