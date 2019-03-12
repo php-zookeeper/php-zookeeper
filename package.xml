@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>yes</active>
  </developer>
- <date>2019-01-23</date>
+ <date>2019-03-12</date>
  <version>
-  <release>0.6.3</release>
+  <release>0.6.4</release>
   <api>0.6.0</api>
  </version>
  <stability>
@@ -39,9 +39,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Bugs:
-- Correct exception message (From "Failed to connect to Zookeeper" to "Failed to initialize ZooKeeper ...", Issue #29)
-- Fix 'duplicate symbol _php_zk_config_ce'
-- Fix segmentation fault when destroying Zookeeper instance (GH PR #31)
+- Fix segmentation fault after destroying Zookeeper instance (Issue #32)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -90,6 +88,16 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>stable</release><api>alpha</api></stability>
+   <version><release>0.6.4</release><api>0.6.0</api></version>
+   <date>2019-03-12</date>
+   <notes><![CDATA[
+Bugs:
+- Fix segmentation fault after destroying Zookeeper instance (Issue #32)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>stable</release><api>alpha</api></stability>
    <version><release>0.6.3</release><api>0.6.0</api></version>
