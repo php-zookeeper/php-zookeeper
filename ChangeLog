@@ -1,6 +1,11 @@
 ZooKeeper Extension Changelog
 
 
+Version 0.6.4
+-------------
+	Bugs:
+	* Fix segmentation fault after destroying Zookeeper instance (Issue #32)
+
 Version 0.6.3
 -------------
 	Bugs:
