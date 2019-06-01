@@ -156,6 +156,10 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 	}
 
 	i_obj->zk = zk;
+	// Below assignment stores a pointer to the callback data in the Zookeeper instance, while the
+	// callbacks hashtable also has a pointer to it. The cb_data pointer is referenced in a couple
+	// of places in the source. However, commenting out below assignment does not cause any of the
+	// unit tests to fail. Is it actually used, or is this lack of test coverage?
 	i_obj->cb_data = cb_data;
 }
 
@@ -812,7 +816,11 @@ static void php_zk_close(php_zk_t *i_obj TSRMLS_DC)
 	php_cb_data_t *cb_data_p;
 
 	if (i_obj->cb_data) {
-		php_cb_data_destroy(&i_obj->cb_data);
+		// Below line will free the callback data using the cb_data pointer
+		// stored in the Zookeeper instance. The destructor of the callbacks hashtable
+		// (php_cb_data_zv_destroy) already frees the callback data. Below line resulted
+		// in a double free, which triggers segfaults.
+		//php_cb_data_destroy(&i_obj->cb_data);
 		i_obj->cb_data = NULL;
 	}
 
