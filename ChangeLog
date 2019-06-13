@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 0.7.2
+-------------
+	Bugs:
+	* Fix segfault due to double free of global callback data (GH PR #35)
+
 Version 0.7.1
 -------------
 	Bugs:
