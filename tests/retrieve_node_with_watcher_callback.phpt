@@ -9,13 +9,28 @@ if (!extension_loaded('zookeeper'))
 <?php
 class Test extends Zookeeper
 {
+    private $path = '';
+
     public function watcher($i, $type, $key)
     {
-        $this->get('/zookeeper', array($this, 'watcher'));
+        $this->get($this->path, array($this, 'watcher'));
+    }
+
+    public function setPath(string $path): void
+    {
+        $this->path = $path;
     }
 }
 
 $test = new Test('127.0.0.1:2181');
-echo gettype($test->get('/zookeeper', array($test, 'watcher')));
+
+$path = '/test-node-' . uniqid();
+$test->create($path, null);
+
+$test->setPath($path);
+echo gettype($test->get($path, array($test, 'watcher')));
+
+$test->delete($path);
+
 --EXPECT--
 NULL

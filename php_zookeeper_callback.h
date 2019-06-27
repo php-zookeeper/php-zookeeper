@@ -32,6 +32,7 @@ typedef struct _php_cb_data_t {
 } php_cb_data_t;
 
 php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
-void php_cb_data_destroy(php_cb_data_t **entry);
+void php_cb_data_destroy(php_cb_data_t *cbd);
+void php_cb_data_remove(php_cb_data_t *cb_data);
 
 #endif  /* PHP_ZOOKEEPER_CALLBACK */

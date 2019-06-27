@@ -314,7 +314,7 @@ static PHP_METHOD(Zookeeper, getChildren)
 							   (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 							   cb_data, &strings);
 	if (status != ZOK) {
-		php_cb_data_destroy(&cb_data);
+		php_cb_data_remove(cb_data);
 		php_zk_throw_exception(status TSRMLS_CC);
 		return;
 	}
@@ -363,40 +363,30 @@ static PHP_METHOD(Zookeeper, get)
 		status = zoo_exists(i_obj->zk, path, 0, &stat);/* I think we don't need zk->watcher any more */
 
 		if (status != ZOK) {
-			php_cb_data_destroy(&cb_data);
+			php_cb_data_remove(cb_data);
 			php_zk_throw_exception(status TSRMLS_CC);
 			return;
 		}
-		length = stat.dataLength;
+
+		length = (stat.dataLength > 0)?stat.dataLength:1; // At least one byte
 	} else {
 		length = max_size;
 	}
 
-	if (length <= 0) {/* znode carries a NULL */
-		if (stat_info) {
-			php_stat_to_array(&stat, stat_info);
-		}
-
-		php_cb_data_destroy(&cb_data);
-		RETURN_NULL();
-	}
+	/* We should not break the procedure here
+		because if znode carries a NULL,
+		cb_data will lose it's use */
 
 	php_zk_log_info(i_obj->zk, "path=%s, cb_data=%p", path, cb_data);
 
-	buffer = emalloc (length+1);
+	buffer = emalloc (length);
 	status = zoo_wget(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 					  cb_data, buffer, &length, &stat);
-	buffer[length] = 0;
 
 	if (status != ZOK) {
 		efree (buffer);
-		php_cb_data_destroy(&cb_data);
+		php_cb_data_remove(cb_data);
 		php_zk_throw_exception(status TSRMLS_CC);
-
-		/* Indicate data marshalling failure with boolean false so that user can retry */
-		if (status == ZMARSHALLINGERROR) {
-			RETURN_FALSE;
-		}
 		return;
 	}
 
@@ -406,7 +396,6 @@ static PHP_METHOD(Zookeeper, get)
 
 	/* Length will be returned as -1 if the znode carries a NULL */
 	if (length == -1) {
-		php_cb_data_destroy(&cb_data);
 		RETURN_NULL();
 	}
 
@@ -441,7 +430,7 @@ static PHP_METHOD(Zookeeper, exists)
 	status = zoo_wexists(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 						 cb_data, &stat);
 	if (status != ZOK && status != ZNONODE) {
-		php_cb_data_destroy(&cb_data);
+		php_cb_data_remove(cb_data);
 		php_zk_throw_exception(status TSRMLS_CC);
 		return;
 	}
@@ -712,7 +701,7 @@ static PHP_METHOD(Zookeeper, setWatcher)
 	ZK_METHOD_FETCH_OBJECT;
 
 	if (i_obj->cb_data) {
-		zend_hash_index_del(&i_obj->callbacks, i_obj->cb_data->h);
+		php_cb_data_remove(i_obj->cb_data);
 	}
 	cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 0 TSRMLS_CC);
 	zoo_set_watcher(i_obj->zk, php_zk_watcher_marshal);
@@ -820,7 +809,7 @@ static void php_zk_close(php_zk_t *i_obj TSRMLS_DC)
 		// stored in the Zookeeper instance. The destructor of the callbacks hashtable
 		// (php_cb_data_zv_destroy) already frees the callback data. Below line resulted
 		// in a double free, which triggers segfaults.
-		//php_cb_data_destroy(&i_obj->cb_data);
+		php_cb_data_remove(i_obj->cb_data);
 		i_obj->cb_data = NULL;
 	}
 
@@ -850,8 +839,7 @@ static void php_zk_free_storage(zend_object *obj TSRMLS_DC)
 static void php_cb_data_zv_destroy(zval *entry)
 {
 	if( Z_TYPE_P(entry) == IS_PTR ) {
-		php_cb_data_destroy(Z_PTR_P(entry)); // php_cb_data_t
-		efree(Z_PTR_P(entry)); // Allocated by zend_hash_next_index_insert_mem()
+		php_cb_data_destroy((php_cb_data_t *)Z_PTR_P(entry)); // php_cb_data_t
 	}
 }
 
@@ -892,7 +880,7 @@ static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int sta
 	zval_ptr_dtor(&params[2]);
 
 	if (cb_data->oneshot) {
-		zend_hash_index_del(cb_data->ht, cb_data->h);
+		php_cb_data_remove(cb_data);
 	}
 }
 
@@ -915,7 +903,7 @@ static inline void php_zk_dispatch_one_completion(php_cb_data_t *cb_data, int rc
 	}
 
 	if (cb_data->oneshot) {
-		zend_hash_index_del(cb_data->ht, cb_data->h);
+		php_cb_data_remove(cb_data);
 	}
 }
 

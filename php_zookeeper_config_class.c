@@ -83,20 +83,14 @@ static PHP_METHOD(ZookeeperConfig, get)
         cb_data = php_cb_data_new(&i_obj->php_zk->callbacks, &fci, &fcc, 1 TSRMLS_CC);
     }
 
-    buffer = emalloc (length+1);
+    buffer = emalloc(length);
     status = zoo_wgetconfig(i_obj->php_zk->zk, (fci.size != 0) ? php_zk_watcher_marshal : NULL,
                       cb_data, buffer, &length, &stat);
-    buffer[length] = 0;
 
     if (status != ZOK) {
         efree (buffer);
-        php_cb_data_destroy(&cb_data);
+        php_cb_data_remove(cb_data);
         php_zk_throw_exception(status TSRMLS_CC);
-
-        /* Indicate data marshalling failure with boolean false so that user can retry */
-        if (status == ZMARSHALLINGERROR) {
-            RETURN_FALSE;
-        }
         return;
     }
 

@@ -8,7 +8,7 @@ if (!extension_loaded('zookeeper'))
 --FILE--
 <?php
 $client = new Zookeeper('localhost:2181');
-$client->create('/test1', '', array(
+$client->create('/test1', null, array(
     array(
         'perms'  => Zookeeper::PERM_ALL,
         'scheme' => 'world',
