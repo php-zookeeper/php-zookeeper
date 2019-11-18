@@ -24,7 +24,7 @@ typedef struct _php_cb_data_t {
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;
     zend_bool oneshot;
-    ulong h;
+    zend_ulong h;
     HashTable *ht;
 #if ZTS
     void ***ctx;
