@@ -4,6 +4,7 @@ Version 0.7.2
 -------------
 	Bugs:
 	* Fix segfault due to double free of global callback data (GH PR #35)
+	* Optimize callback-related statements
 
 Version 0.7.1
 -------------
