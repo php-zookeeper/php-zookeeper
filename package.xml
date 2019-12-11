@@ -25,9 +25,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <name>John Boehr</name>
   <user>jbboehr</user>
   <email>jbboehr@gmail.com</email>
-  <active>yes</active>
+  <active>no</active>
  </developer>
- <date>2019-12-09</date>
+ <date>2019-12-11</date>
  <version>
   <release>0.7.2</release>
   <api>0.7.0</api>
@@ -41,6 +41,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
 Bugs:
 - Fix segfault due to double free of global callback data (GH PR #35)
 - Optimize callback-related statements
+- Fix build error with PHP 7.4 (GH PR #38)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -91,11 +92,12 @@ Bugs:
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.7.2</release><api>0.7.0</api></version>
-   <date>2019-12-09</date>
+   <date>2019-12-11</date>
    <notes><![CDATA[
 Bugs:
 - Fix segfault due to double free of global callback data (GH PR #35)
 - Optimize callback-related statements
+- Fix build error with PHP 7.4 (GH PR #38)
    ]]></notes>
   </release>
 
