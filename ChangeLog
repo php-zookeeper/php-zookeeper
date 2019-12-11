@@ -5,6 +5,7 @@ Version 0.7.2
 	Bugs:
 	* Fix segfault due to double free of global callback data (GH PR #35)
 	* Optimize callback-related statements
+	* Fix build error with PHP 7.4 (GH PR #38)
 
 Version 0.7.1
 -------------
