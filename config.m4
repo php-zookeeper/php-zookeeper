@@ -107,11 +107,15 @@ if test "$PHP_ZOOKEEPER" != "no"; then
     ])
 
     AC_MSG_CHECKING([whether ZooKeeper Config is enabled])
+    ZOO_VERSION=$(cat ${PHP_LIBZOOKEEPER_INCDIR}/zookeeper_version.h |grep ZOO_VERSION|awk '{print $3}')
     ZOO_MINOR_VERSION=$(cat ${PHP_LIBZOOKEEPER_INCDIR}/zookeeper_version.h |grep ZOO_MINOR_VERSION|awk '{print $3}')
     PHP_ZOOKEEPER_CONFIG_FILES=""
-    if test ${ZOO_MINOR_VERSION} -eq 5; then
+    if test $ZOO_VERSION; then
       PHP_ZOOKEEPER_CONFIG_FILES="php_zookeeper_config_class.c"
-      AC_MSG_RESULT([enabled])
+      AC_MSG_RESULT([enabled with ZOO_VERSION])
+    elif test ${ZOO_MINOR_VERSION} -eq 5; then
+      PHP_ZOOKEEPER_CONFIG_FILES="php_zookeeper_config_class.c"
+      AC_MSG_RESULT([enabled with ZOO_MINOR_VERSION])
     else
       AC_MSG_RESULT([disabled])
     fi
