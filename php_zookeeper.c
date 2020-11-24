@@ -772,7 +772,7 @@ static PHP_METHOD(Zookeeper, dispatch)
 }
 /* }}} */
 
-#if defined(ZOO_VERSION) || (defined(ZOO_MAJOR_VERSION) && ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 /* {{{ Zookeeper::getConfig( .. )
    */
 static PHP_METHOD(Zookeeper, getConfig)
@@ -1250,7 +1250,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_dispatch, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(ZOO_VERSION) || (defined(ZOO_MAJOR_VERSION) && ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 ZEND_BEGIN_ARG_INFO(arginfo_getConfig, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -1290,7 +1290,7 @@ static zend_function_entry zookeeper_class_methods[] = {
 
 	ZK_ME_STATIC(dispatch,    arginfo_dispatch)
 
-#if defined(ZOO_VERSION) || (defined(ZOO_MAJOR_VERSION) && ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	ZK_ME(getConfig,          arginfo_getConfig)
 #endif
 
@@ -1381,7 +1381,7 @@ static void php_zk_register_constants(INIT_FUNC_ARGS)
 	ZK_CLASS_CONST_LONG2(OPERATIONTIMEOUT);
 	ZK_CLASS_CONST_LONG2(BADARGUMENTS);
 	ZK_CLASS_CONST_LONG2(INVALIDSTATE);
-#if defined(ZOO_VERSION) || (defined(ZOO_MAJOR_VERSION) && ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	ZK_CLASS_CONST_LONG2(NEWCONFIGNOQUORUM);
 	ZK_CLASS_CONST_LONG2(RECONFIGINPROGRESS);
 #endif
@@ -1463,7 +1463,7 @@ PHP_MINIT_FUNCTION(zookeeper)
 
 	php_zk_register_exceptions(TSRMLS_C);
 
-#if defined(ZOO_VERSION) || defined(ZOO_MAJOR_VERSION) && ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	php_zk_config_register(TSRMLS_C);
 #endif
 
