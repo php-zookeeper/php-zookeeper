@@ -105,7 +105,7 @@ static void php_zk_close(php_zk_t *i_obj TSRMLS_DC);
   Async
 ****************************************/
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1 || PHP_MAJOR_VERSION >= 8
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 static void php_zk_interrupt_function(zend_execute_data *execute_data)
 {
@@ -1003,7 +1003,7 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 	ZK_G(tail) = p;
 	ZK_G(pending_marshals) = 1;
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1 || PHP_MAJOR_VERSION >= 8
 	EG(vm_interrupt) = 1;
 #endif
 
@@ -1047,7 +1047,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 	ZK_G(tail) = p;
 	ZK_G(pending_marshals) = 1;
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1 || PHP_MAJOR_VERSION >= 8
 	EG(vm_interrupt) = 1;
 #endif
 
@@ -1467,7 +1467,7 @@ PHP_MINIT_FUNCTION(zookeeper)
 	php_zk_config_register(TSRMLS_C);
 #endif
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1 || PHP_MAJOR_VERSION >= 8
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = php_zk_interrupt_function;
 #else
