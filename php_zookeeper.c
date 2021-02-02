@@ -1302,7 +1302,7 @@ static zend_function_entry zookeeper_class_methods[] = {
 
 /* {{{ zookeeper_function_entry */
 static const zend_function_entry zookeeper_functions[] = {
-	PHP_FE(zookeeper_dispatch, NULL)
+	PHP_FE(zookeeper_dispatch, arginfo_dispatch)
 	PHP_FE_END
 };
 /* }}} */
