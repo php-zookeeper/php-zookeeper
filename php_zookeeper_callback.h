@@ -20,6 +20,14 @@
 #include <zookeeper.h>
 #include <php.h>
 
+#ifndef TSRMLS_D
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#endif
+
 typedef struct _php_cb_data_t {
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;

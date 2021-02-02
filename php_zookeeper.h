@@ -34,6 +34,14 @@ extern zend_module_entry zookeeper_module_entry;
 #define PHP_ZOOKEEPER_API
 #endif
 
+#ifndef TSRMLS_D
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#endif
+
 struct php_zk_pending_marshal {
 	struct php_zk_pending_marshal *next;
 	struct _php_cb_data_t *cb_data;
