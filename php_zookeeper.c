@@ -852,7 +852,7 @@ zend_object* php_zk_new(zend_class_entry *ce TSRMLS_DC)
 	object_properties_init(&i_obj->zo, ce);
 	i_obj->zo.handlers = &zookeeper_obj_handlers;
 
-	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0, 0);
+	zend_hash_init(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0);
 
 	return &i_obj->zo;
 }
