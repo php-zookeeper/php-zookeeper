@@ -1154,7 +1154,7 @@ zend_class_entry *php_zk_get_ce(void)
 /* }}} */
 
 /* {{{ methods arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, watcher_cb)
 	ZEND_ARG_INFO(0, recv_timeout)
@@ -1187,6 +1187,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, watcher_cb)
 	ZEND_ARG_INFO(1, stat_info)
+	ZEND_ARG_INFO(0, max_size)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exists, 0, 0, 1)
@@ -1205,6 +1206,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_getClientId, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_getAcl, 0)
+	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_setAcl, 0)
