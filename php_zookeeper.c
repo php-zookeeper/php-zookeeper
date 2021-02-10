@@ -76,7 +76,9 @@ static zend_class_entry *zookeeper_ce = NULL;
 
 static zend_object_handlers zookeeper_obj_handlers;
 
+#if HAVE_PTHREAD
 static pthread_mutex_t cb_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 #ifdef HAVE_ZOOKEEPER_SESSION
 static int le_zookeeper_connection;
