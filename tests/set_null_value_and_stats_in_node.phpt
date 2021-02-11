@@ -8,6 +8,11 @@ if (!extension_loaded('zookeeper'))
 --FILE--
 <?php
 $client = new Zookeeper('localhost:2181');
+
+if ($client->exists('/tes')) {
+    $client->delete('/tes');
+}
+
 $client->create('/tes', null, array(
     array(
         'perms'  => Zookeeper::PERM_ALL,
