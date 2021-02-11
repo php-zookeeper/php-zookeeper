@@ -13,7 +13,7 @@ class Test extends Zookeeper
 
     public function watcher($i, $type, $key)
     {
-        $this->get($this->path, array($this, 'watcher'));
+        $this->exists($this->path, array($this, 'watcher'));
     }
 
     public function setPath(string $path): void
