@@ -7,12 +7,13 @@ LIBZOOKEEPER_PATCH_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $3}
 
 if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 -a ${LIBZOOKEEPER_PATCH_VERSION} -ge 9 ]; then
     PACKAGE_NAME=apache-zookeeper-${LIBZOOKEEPER_VERSION}
+    URL_PREFIX=http://apache.mirrors.lucidnetworks.net/zookeeper
 else
     PACKAGE_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
+    URL_PREFIX=http://archive.apache.org/dist/zookeeper
 fi
 URL_DIR_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
 LIBZOOKEEPER_PREFIX=${HOME}/lib${URL_DIR_NAME}
-URL_PREFIX=http://apache.mirrors.lucidnetworks.net/zookeeper
 
 TRAVIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
