@@ -36,11 +36,9 @@ else
     ${PACKAGE_NAME}/bin/zkServer.sh start
 fi
 
+cd ${PACKAGE_NAME}/zookeeper-client/zookeeper-client-c
 if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 -a ${LIBZOOKEEPER_PATCH_VERSION} -ge 9 ]; then
-    cd ${PACKAGE_NAME}/zookeeper-client/zookeeper-client-c
     autoreconf -if
-else
-    cd ${PACKAGE_NAME}/src/c
 fi
     ./configure --prefix=${LIBZOOKEEPER_PREFIX} || exit 1
     make || exit 1
