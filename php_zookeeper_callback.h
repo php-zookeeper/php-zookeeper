@@ -26,6 +26,7 @@
 #define TSRMLS_C
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
+#define TSRMLS_SET_CTX()
 #endif
 
 typedef struct _php_cb_data_t {
