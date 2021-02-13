@@ -27,7 +27,7 @@
 #define TSRMLS_C
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
-#define TSRMLS_SET_CTX()
+#define TSRMLS_SET_CTX(z)
 #endif // PHP >= 8.0
 #endif
 
