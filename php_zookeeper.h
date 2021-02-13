@@ -35,11 +35,13 @@ extern zend_module_entry zookeeper_module_entry;
 #endif
 
 #ifndef TSRMLS_D
+#if PHP_VERSION_ID >= 80000
 #define TSRMLS_D void
 #define TSRMLS_DC
 #define TSRMLS_C
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
+#endif // if PHP >= 8.0
 #endif
 
 struct php_zk_pending_marshal {
