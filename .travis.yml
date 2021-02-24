@@ -13,6 +13,7 @@ addons:
   apt:
     packages:
       - lcov
+      - libcppunit-dev
 
 sudo: false
 
