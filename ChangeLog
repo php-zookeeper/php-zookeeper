@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 0.8.0
+-------------
+	Improvements:
+	* Make extension compatible with Zookeeper 3.6 (Thanks to camporter, GH PR #43)
+
 Version 0.7.2
 -------------
 	Bugs:
