@@ -20,6 +20,17 @@
 #include <zookeeper.h>
 #include <php.h>
 
+#ifndef TSRMLS_D
+#if PHP_VERSION_ID >= 80000
+#define TSRMLS_D void
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#define TSRMLS_FETCH()
+#define TSRMLS_SET_CTX(z)
+#endif // PHP >= 8.0
+#endif
+
 typedef struct _php_cb_data_t {
     zend_fcall_info fci;
     zend_fcall_info_cache fcc;

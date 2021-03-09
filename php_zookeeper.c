@@ -76,7 +76,9 @@ static zend_class_entry *zookeeper_ce = NULL;
 
 static zend_object_handlers zookeeper_obj_handlers;
 
+#if HAVE_PTHREAD
 static pthread_mutex_t cb_lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 #ifdef HAVE_ZOOKEEPER_SESSION
 static int le_zookeeper_connection;
@@ -105,7 +107,7 @@ static void php_zk_close(php_zk_t *i_obj TSRMLS_DC);
   Async
 ****************************************/
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_VERSION_ID >= 70100
 static void (*orig_interrupt_function)(zend_execute_data *execute_data);
 static void php_zk_interrupt_function(zend_execute_data *execute_data)
 {
@@ -852,7 +854,7 @@ zend_object* php_zk_new(zend_class_entry *ce TSRMLS_DC)
 	object_properties_init(&i_obj->zo, ce);
 	i_obj->zo.handlers = &zookeeper_obj_handlers;
 
-	zend_hash_init_ex(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0, 0);
+	zend_hash_init(&i_obj->callbacks, 5, NULL, (dtor_func_t)php_cb_data_zv_destroy, 0);
 
 	return &i_obj->zo;
 }
@@ -1003,7 +1005,7 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 	ZK_G(tail) = p;
 	ZK_G(pending_marshals) = 1;
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_VERSION_ID >= 70100
 	EG(vm_interrupt) = 1;
 #endif
 
@@ -1047,7 +1049,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 	ZK_G(tail) = p;
 	ZK_G(pending_marshals) = 1;
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_VERSION_ID >= 70100
 	EG(vm_interrupt) = 1;
 #endif
 
@@ -1154,7 +1156,7 @@ zend_class_entry *php_zk_get_ce(void)
 /* }}} */
 
 /* {{{ methods arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, watcher_cb)
 	ZEND_ARG_INFO(0, recv_timeout)
@@ -1187,6 +1189,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, watcher_cb)
 	ZEND_ARG_INFO(1, stat_info)
+	ZEND_ARG_INFO(0, max_size)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_exists, 0, 0, 1)
@@ -1205,6 +1208,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_getClientId, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_getAcl, 0)
+	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_setAcl, 0)
@@ -1302,7 +1306,7 @@ static zend_function_entry zookeeper_class_methods[] = {
 
 /* {{{ zookeeper_function_entry */
 static const zend_function_entry zookeeper_functions[] = {
-	PHP_FE(zookeeper_dispatch, NULL)
+	PHP_FE(zookeeper_dispatch, arginfo_dispatch)
 	PHP_FE_END
 };
 /* }}} */
@@ -1467,7 +1471,7 @@ PHP_MINIT_FUNCTION(zookeeper)
 	php_zk_config_register(TSRMLS_C);
 #endif
 
-#if PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 1
+#if PHP_VERSION_ID >= 70100
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = php_zk_interrupt_function;
 #else

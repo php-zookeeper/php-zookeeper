@@ -1,18 +1,20 @@
 language: php
 php:
+    - 8.0
     - 7.3
     - 7.2
     - 7.1
     - 7.0
 
 env:
-    - LIBZOOKEEPER_VERSION=3.5.5
+    - LIBZOOKEEPER_VERSION=3.5.9
     - LIBZOOKEEPER_VERSION=3.4.14
 
 addons:
   apt:
     packages:
       - lcov
+      - ant
       - libcppunit-dev
 
 sudo: false
