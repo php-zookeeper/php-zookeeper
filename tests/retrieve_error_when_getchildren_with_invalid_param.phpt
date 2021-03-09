@@ -4,10 +4,15 @@ Should retrieve error when get children with invalid param
 <?php
 if (!extension_loaded('zookeeper'))
     echo 'skip ZooKeeper extension is not loaded';
+if (version_compare(PHP_VERSION, "8.0.0") < 0) {
+    echo "skip PHP version should be at least 8.0.0";
+}
 ?>
---FILE--
-<?php
-$client = new Zookeeper('localhost:2181');
-$client->getChildren(array());
+--FILE_EXTERNAL--
+files/retrieve_error_when_getchildren_with_invalid_param.inc
 --EXPECTF--
-Warning: Zookeeper::getChildren() expects parameter %d to be string, array given in %s on line %d
+Fatal error: Uncaught TypeError: Zookeeper::getChildren(): Argument #1 ($path) must be of type string, array given in %s:%d
+Stack trace:
+#0 %s(%d): Zookeeper->getChildren(Array)
+#1 {main}
+  thrown in %s on line %d

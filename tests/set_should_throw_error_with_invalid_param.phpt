@@ -4,10 +4,15 @@ Set should throw error with invalid paramater
 <?php
 if (!extension_loaded('zookeeper'))
     echo 'skip ZooKeeper extension is not loaded';
+if (version_compare(PHP_VERSION, "8.0.0") < 0) {
+    echo "skip PHP version should be at least 8.0.0";
+}
 ?>
---FILE--
-<?php
-$client = new Zookeeper('localhost:2181');
-$client->set(array());
+--FILE_EXTERNAL--
+files/set_should_throw_error_with_invalid_param.inc
 --EXPECTF--
-Warning: Zookeeper::set() expects at least %d parameters, %d given in %s on line %d
+Fatal error: Uncaught ArgumentCountError: Zookeeper::set() expects at least 2 arguments, 1 given in %s:%d
+Stack trace:
+#0 %s(%d): Zookeeper->set(Array)
+#1 {main}
+  thrown in %s on line %d

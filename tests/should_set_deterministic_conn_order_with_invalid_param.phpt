@@ -4,10 +4,15 @@ Test should set deterministic conn order with invalid parameter
 <?php
 if (!extension_loaded('zookeeper'))
     echo 'skip ZooKeeper extension is not loaded';
+if (version_compare(PHP_VERSION, "8.0.0") < 0) {
+    echo "skip PHP version should be at least 8.0.0";
+}
 ?>
---FILE--
-<?php
-$client = new Zookeeper('localhost:2181');
-$client->setDeterministicConnOrder(array());
+--FILE_EXTERNAL--
+files/should_set_deterministic_conn_order_with_invalid_param.inc
 --EXPECTF--
-Warning: Zookeeper::setDeterministicConnOrder() expects parameter %d to be boo%s, array given in %s on line %d
+Fatal error: Uncaught TypeError: Zookeeper::setDeterministicConnOrder(): Argument #1 ($trueOrFalse) must be of type bool, array given in %s:%d
+Stack trace:
+#0 %s(%d): Zookeeper::setDeterministicConnOrder(Array)
+#1 {main}
+  thrown in %s on line %d
