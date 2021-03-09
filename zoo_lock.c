@@ -97,7 +97,7 @@ ZOOAPI int zkr_lock_unlock(zkr_lock_mutex_t *mutex) {
         while (ret == ZCONNECTIONLOSS && (count < 3)) {
             ret = zoo_delete(zh, buf, -1);
             if (ret == ZCONNECTIONLOSS) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
                 LOG_DEBUG(LOGCALLBACK(zh), ("connectionloss while deleting the node"));
 #else
                 LOG_DEBUG(("connectionloss while deleting the node"));
@@ -117,7 +117,7 @@ ZOOAPI int zkr_lock_unlock(zkr_lock_mutex_t *mutex) {
             pthread_mutex_unlock(&(mutex->pmutex));
             return 0;
         }
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
         LOG_WARN(LOGCALLBACK(zh), ("not able to connect to server - giving up"));
 #else
         LOG_WARN(("not able to connect to server - giving up"));
@@ -188,7 +188,7 @@ static int retry_getchildren(zhandle_t *zh, char* path, struct String_vector *ve
     while (ret == ZCONNECTIONLOSS && count < retry) {
         ret = zoo_get_children(zh, path, 0, vector);
         if (ret == ZCONNECTIONLOSS) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
             LOG_DEBUG(LOGCALLBACK(zh), ("connection loss to the server"));
 #else
             LOG_DEBUG(("connection loss to the server"));
@@ -228,7 +228,7 @@ static int retry_zoowexists(zhandle_t *zh, char* path, watcher_fn watcher, void*
     while (ret == ZCONNECTIONLOSS && count < retry) {
         ret = zoo_wexists(zh, path, watcher, ctx, stat);
         if (ret == ZCONNECTIONLOSS) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
             LOG_DEBUG(LOGCALLBACK(zh), ("connectionloss while setting watch on my predecessor"));
 #else
             LOG_DEBUG(("connectionloss while setting watch on my predecessor"));
@@ -287,7 +287,7 @@ static int zkr_lock_operation(zkr_lock_mutex_t *mutex, struct timespec *ts) {
             // do not want to retry the create since
             // we would end up creating more than one child
             if (ret != ZOK) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
                 LOG_WARN(LOGCALLBACK(zh), ("could not create zoo node %s", buf));
 #else
                 LOG_WARN(("could not create zoo node %s", buf));
@@ -301,7 +301,7 @@ static int zkr_lock_operation(zkr_lock_mutex_t *mutex, struct timespec *ts) {
             ret = ZCONNECTIONLOSS;
             ret = retry_getchildren(zh, path, vector, ts, retry);
             if (ret != ZOK) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
                 LOG_WARN(LOGCALLBACK(zh), ("could not connect to server"));
 #else
                 LOG_WARN(("could not connect to server"));
@@ -327,7 +327,7 @@ static int zkr_lock_operation(zkr_lock_mutex_t *mutex, struct timespec *ts) {
                 // will keep waiting
                 if (ret != ZOK) {
                     free_String_vector(vector);
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
                     LOG_WARN(LOGCALLBACK(zh), ("unable to watch my predecessor"));
 #else
                     LOG_WARN(("unable to watch my predecessor"));
@@ -347,7 +347,7 @@ static int zkr_lock_operation(zkr_lock_mutex_t *mutex, struct timespec *ts) {
                 // this is the case when we are the owner
                 // of the lock
                 if (strcmp(mutex->id, owner_id) == 0) {
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
                     LOG_DEBUG(LOGCALLBACK(zh), ("got the zoo lock owner - %s", mutex->id));
 #else
                     LOG_DEBUG(("got the zoo lock owner - %s", mutex->id));

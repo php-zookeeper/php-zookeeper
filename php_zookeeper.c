@@ -774,7 +774,7 @@ static PHP_METHOD(Zookeeper, dispatch)
 }
 /* }}} */
 
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 /* {{{ Zookeeper::getConfig( .. )
    */
 static PHP_METHOD(Zookeeper, getConfig)
@@ -1254,7 +1254,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_dispatch, 0)
 ZEND_END_ARG_INFO()
 
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 ZEND_BEGIN_ARG_INFO(arginfo_getConfig, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -1294,7 +1294,7 @@ static zend_function_entry zookeeper_class_methods[] = {
 
 	ZK_ME_STATIC(dispatch,    arginfo_dispatch)
 
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	ZK_ME(getConfig,          arginfo_getConfig)
 #endif
 
@@ -1385,7 +1385,7 @@ static void php_zk_register_constants(INIT_FUNC_ARGS)
 	ZK_CLASS_CONST_LONG2(OPERATIONTIMEOUT);
 	ZK_CLASS_CONST_LONG2(BADARGUMENTS);
 	ZK_CLASS_CONST_LONG2(INVALIDSTATE);
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	ZK_CLASS_CONST_LONG2(NEWCONFIGNOQUORUM);
 	ZK_CLASS_CONST_LONG2(RECONFIGINPROGRESS);
 #endif
@@ -1467,7 +1467,7 @@ PHP_MINIT_FUNCTION(zookeeper)
 
 	php_zk_register_exceptions(TSRMLS_C);
 
-#if ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5
+#if defined(ZOO_VERSION) || (ZOO_MAJOR_VERSION>=3 && ZOO_MINOR_VERSION>=5)
 	php_zk_config_register(TSRMLS_C);
 #endif
 
@@ -1541,7 +1541,11 @@ PHP_MINFO_FUNCTION(zookeeper)
 	php_info_print_table_header(2, "zookeeper support", "enabled");
 	php_info_print_table_row(2, "version", PHP_ZOOKEEPER_VERSION);
 
+#if defined(ZOO_VERSION)
+	snprintf(buf, sizeof(buf), "%s", ZOO_VERSION);
+#else
 	snprintf(buf, sizeof(buf), "%ld.%ld.%ld", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
+#endif
 	php_info_print_table_row(2, "libzookeeper version", buf);
 
 	php_info_print_table_end();

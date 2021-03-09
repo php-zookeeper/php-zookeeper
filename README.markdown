@@ -29,6 +29,25 @@ $ make
 $ sudo make install
 ```
 
+As of ZooKeeper 3.5.0, after unpacking source tarball, the following command should be executed before above-metioned steps:
+
+```shell
+$ autoreconf -if
+```
+
+As of ZooKeeper 3.5.9, the following command should be executed before `autoreconf -if`:
+
+```shell
+$ ant compile_jute
+```
+
+As of ZooKeeper 3.6.0, `ant` will fail because of missing `build.xml`. That file and two other files can be found in source tarball of `3.5.9`:
+
+```shell
+$ cd apache-zookeeper-3.5.9
+$ cp build.xml ivy* ../apache-zookeeper-3.6.2
+```
+
 
 
 ### 2.Compile PHP ZooKeeper Extension
