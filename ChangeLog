@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 0.9.0
+-------------
+	Improvements:
+	* Make extension compatible with PHP 8 (Thanks to John P. Bloch, GH PR #44)
+
 Version 0.8.0
 -------------
 	Improvements:
