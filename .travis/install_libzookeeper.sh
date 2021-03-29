@@ -5,13 +5,12 @@ LIBZOOKEEPER_MAJOR_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $1}
 LIBZOOKEEPER_MINOR_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $2}'`
 LIBZOOKEEPER_PATCH_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $3}'`
 
-if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 -a ${LIBZOOKEEPER_PATCH_VERSION} -ge 9 ]; then
+if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 ]; then
     PACKAGE_NAME=apache-zookeeper-${LIBZOOKEEPER_VERSION}
-    URL_PREFIX=http://apache.mirrors.lucidnetworks.net/zookeeper
 else
     PACKAGE_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
-    URL_PREFIX=http://archive.apache.org/dist/zookeeper
 fi
+URL_PREFIX=http://archive.apache.org/dist/zookeeper
 URL_DIR_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
 LIBZOOKEEPER_PREFIX=${HOME}/lib${URL_DIR_NAME}
 
