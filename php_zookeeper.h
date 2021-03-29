@@ -42,10 +42,6 @@ extern zend_module_entry zookeeper_module_entry;
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
 #define TSRMLS_FETCH_FROM_CTX(z)
-void *tsrm_set_interpreter_context(void *new_ctx)
-{
-	return NULL;
-}
 #endif // if PHP >= 8.0
 #endif
 

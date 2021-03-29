@@ -52,6 +52,16 @@
 #include "php_zookeeper_log.h"
 
 /****************************************
+  PHP 8.0 compat
+****************************************/
+#if PHP_VERSION_ID >= 80000
+void *tsrm_set_interpreter_context(void *ctx)
+{
+	return NULL;
+}
+#endif
+
+/****************************************
   Helper macros
 ****************************************/
 
