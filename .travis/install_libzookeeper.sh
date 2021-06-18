@@ -1,9 +1,15 @@
 #! /bin/sh
 
+TRAVIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
 LIBZOOKEEPER_VERSION=$1
 LIBZOOKEEPER_MAJOR_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $1}'`
 LIBZOOKEEPER_MINOR_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $2}'`
 LIBZOOKEEPER_PATCH_VERSION=`echo ${LIBZOOKEEPER_VERSION} | awk -F'.' '{print $3}'`
+
+if [ ${LIBZOOKEEPER_MAJOR_VERSION} -eq 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -eq 6 ]; then
+    ${TRAVIS_SCRIPT_DIR}/install_libzookeeper_3.6.sh ${LIBZOOKEEPER_VERSION} || exit 1
+    exit 0
+fi
 
 if [ ${LIBZOOKEEPER_MAJOR_VERSION} -ge 3 -a ${LIBZOOKEEPER_MINOR_VERSION} -ge 5 -a ${LIBZOOKEEPER_PATCH_VERSION} -ge 9 ]; then
     PACKAGE_NAME=apache-zookeeper-${LIBZOOKEEPER_VERSION}
@@ -14,8 +20,6 @@ else
 fi
 URL_DIR_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
 LIBZOOKEEPER_PREFIX=${HOME}/lib${URL_DIR_NAME}
-
-TRAVIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
 
 wget ${URL_PREFIX}/${URL_DIR_NAME}/${PACKAGE_NAME}.tar.gz || exit 1
 tar xvf ${PACKAGE_NAME}.tar.gz || exit 1
