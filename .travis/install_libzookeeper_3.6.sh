@@ -3,8 +3,7 @@
 TRAVIS_SCRIPT_DIR=$(cd $(dirname $0); pwd)
 LIBZOOKEEPER_VERSION=$1
 PACKAGE_NAME=apache-zookeeper-${LIBZOOKEEPER_VERSION}
-#URL_PREFIX=http://apache.mirrors.lucidnetworks.net/zookeeper
-URL_PREFIX=https://mirrors.bfsu.edu.cn/apache/zookeeper
+URL_PREFIX=http://apache.mirrors.lucidnetworks.net/zookeeper
 URL_DIR_NAME=zookeeper-${LIBZOOKEEPER_VERSION}
 LIBZOOKEEPER_PREFIX=${HOME}/lib${URL_DIR_NAME}
 SRC_PKG_NAME=${PACKAGE_NAME}
