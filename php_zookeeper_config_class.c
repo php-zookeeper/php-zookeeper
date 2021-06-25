@@ -35,7 +35,7 @@ zend_class_entry *php_zk_config_ce;
 static zend_object_handlers php_zk_conf_obj_handlers;
 
 static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj);
-static zend_object* php_zk_config_new(zend_class_entry *ce TSRMLS_DC);
+static zend_object* php_zk_config_new(zend_class_entry *ce);
 
 static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, const char *joining,
         const char *leaving, const char *members, int64_t version, zval **stat_info_pp);
@@ -49,7 +49,7 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
 #define PHP_ZK_CONF_METHOD_FETCH_OBJECT                                                 \
     i_obj = Z_ZK_CONF_P(object);   \
     if (!i_obj->php_zk) {   \
-        php_zk_throw_exception(PHPZK_CONNECT_NOT_CALLED TSRMLS_CC); \
+        php_zk_throw_exception(PHPZK_CONNECT_NOT_CALLED); \
         return; \
     } \
 
@@ -68,7 +68,7 @@ static PHP_METHOD(ZookeeperConfig, get)
     int length = 512;
     PHP_ZK_CONF_METHOD_INIT_VARS;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|f!z", &fci,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "|f!z", &fci,
                               &fcc, &stat_info) == FAILURE) {
         return;
     }
@@ -80,7 +80,7 @@ static PHP_METHOD(ZookeeperConfig, get)
     }
 
     if (fci.size != 0) {
-        cb_data = php_cb_data_new(&i_obj->php_zk->callbacks, &fci, &fcc, 1 TSRMLS_CC);
+        cb_data = php_cb_data_new(&i_obj->php_zk->callbacks, &fci, &fcc, 1);
     }
 
     buffer = emalloc(length);
@@ -90,7 +90,7 @@ static PHP_METHOD(ZookeeperConfig, get)
     if (status != ZOK) {
         efree (buffer);
         php_cb_data_remove(cb_data);
-        php_zk_throw_exception(status TSRMLS_CC);
+        php_zk_throw_exception(status);
         return;
     }
 
@@ -118,7 +118,7 @@ static PHP_METHOD(ZookeeperConfig, set)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -137,7 +137,7 @@ static PHP_METHOD(ZookeeperConfig, add)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -156,7 +156,7 @@ static PHP_METHOD(ZookeeperConfig, remove)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -202,7 +202,7 @@ static zend_function_entry zookeeper_config_class_methods[] = {
 #undef ZK_CONF_ME
 /* }}} */
 
-static void php_zk_conf_destroy(php_zk_conf_t *i_obj TSRMLS_DC)
+static void php_zk_conf_destroy(php_zk_conf_t *i_obj)
 {
     efree(i_obj);
 }
@@ -212,16 +212,16 @@ static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj)
     return (php_zk_conf_t *)((char*)(obj) - XtOffsetOf(php_zk_conf_t, zo));
 }
 
-static void php_zk_conf_free_storage(zend_object *obj TSRMLS_DC)
+static void php_zk_conf_free_storage(zend_object *obj)
 {
     php_zk_conf_t *i_obj;
 
     i_obj = php_zk_conf_fetch_object(obj);
-    zend_object_std_dtor(&i_obj->zo TSRMLS_CC);
-    php_zk_conf_destroy(i_obj TSRMLS_CC);
+    zend_object_std_dtor(&i_obj->zo);
+    php_zk_conf_destroy(i_obj);
 }
 
-void php_zk_config_register(TSRMLS_D)
+void php_zk_config_register()
 {
     zend_class_entry ce;
 
@@ -234,17 +234,17 @@ void php_zk_config_register(TSRMLS_D)
     php_zk_conf_obj_handlers.free_obj = php_zk_conf_free_storage;
 }
 
-static zend_object* php_zk_config_new(zend_class_entry *ce TSRMLS_DC)
+static zend_object* php_zk_config_new(zend_class_entry *ce)
 {
-    return php_zk_config_new_from_zk(ce, NULL TSRMLS_CC);
+    return php_zk_config_new_from_zk(ce, NULL);
 }
 
-zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk TSRMLS_DC)
+zend_object* php_zk_config_new_from_zk(zend_class_entry *ce, php_zk_t *php_zk)
 {
     php_zk_conf_t *i_obj;
 
     i_obj = ecalloc(1, sizeof(php_zk_conf_t) + zend_object_properties_size(ce));
-    zend_object_std_init(&i_obj->zo, ce TSRMLS_CC);
+    zend_object_std_init(&i_obj->zo, ce);
     object_properties_init(&i_obj->zo, ce);
     i_obj->zo.handlers = &php_zk_conf_obj_handlers;
 
@@ -275,7 +275,7 @@ static void php_zookeeper_config_reconfig_impl(INTERNAL_FUNCTION_PARAMETERS, con
 
     if (status != ZOK) {
         efree(buffer);
-        php_zk_throw_exception(status TSRMLS_CC);
+        php_zk_throw_exception(status);
         return;
     }
 

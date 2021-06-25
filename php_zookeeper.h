@@ -34,18 +34,6 @@ extern zend_module_entry zookeeper_module_entry;
 #define PHP_ZOOKEEPER_API
 #endif
 
-#ifndef TSRMLS_D
-#if PHP_VERSION_ID >= 80000
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-#define TSRMLS_FETCH()
-#define TSRMLS_FETCH_FROM_CTX(z)
-#define tsrm_set_interpreter_context(z)
-#endif // if PHP >= 8.0
-#endif
-
 struct php_zk_pending_marshal {
 	struct php_zk_pending_marshal *next;
 	struct _php_cb_data_t *cb_data;
@@ -77,11 +65,8 @@ PHP_GINIT_FUNCTION(zookeeper);
 
 ZEND_EXTERN_MODULE_GLOBALS(zookeeper)
 
-#ifdef ZTS
-#define ZK_G(v) TSRMG(zookeeper_globals_id, zend_zookeeper_globals *, v)
-#else
-#define ZK_G(v) (zookeeper_globals.v)
-#endif
+#define ZK_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(zookeeper, v)
+#define ZK_G_P() (zend_zookeeper_globals*)&ZK_G(recv_timeout)
 
 #ifdef HAVE_ZOOKEEPER_SESSION
 

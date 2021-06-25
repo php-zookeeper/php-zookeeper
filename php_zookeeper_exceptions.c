@@ -34,12 +34,12 @@ static zend_class_entry *zk_auth_exception;
 static zend_class_entry *zk_session_exception;
 static zend_class_entry *zk_nonode_exception;
 
-void php_zk_register_exceptions(TSRMLS_D)
+void php_zk_register_exceptions()
 {
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ZookeeperException", NULL);
-	zk_base_exception = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C));
+	zk_base_exception = zend_register_internal_class_ex(&ce, zend_exception_get_default());
 
 	INIT_CLASS_ENTRY(ce, "ZookeeperOperationTimeoutException", NULL);
 	zk_optimeout_exception = zend_register_internal_class_ex(&ce, zk_base_exception);
@@ -60,13 +60,13 @@ void php_zk_register_exceptions(TSRMLS_D)
 	zk_nonode_exception = zend_register_internal_class_ex(&ce, zk_base_exception);
 }
 
-zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message TSRMLS_DC)
+zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message)
 {
-	zend_declare_property_string(ce, "message", strlen("message"), message, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_string(ce, "message", strlen("message"), message, ZEND_ACC_PUBLIC);
 	return ce;
 }
 
-void php_zk_throw_exception(int zk_status TSRMLS_DC)
+void php_zk_throw_exception(int zk_status)
 {
 	zend_class_entry *ce;
 	char *message = NULL;
@@ -109,6 +109,6 @@ void php_zk_throw_exception(int zk_status TSRMLS_DC)
 		message = (char *)zerror(zk_status);
 	}
 
-    zend_throw_exception_ex(ce, zk_status TSRMLS_CC, "%s", message);
+    zend_throw_exception_ex(ce, zk_status, "%s", message);
 	return;
 }

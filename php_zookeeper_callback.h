@@ -19,17 +19,7 @@
 
 #include <zookeeper.h>
 #include <php.h>
-
-#ifndef TSRMLS_D
-#if PHP_VERSION_ID >= 80000
-#define TSRMLS_D void
-#define TSRMLS_DC
-#define TSRMLS_C
-#define TSRMLS_CC
-#define TSRMLS_FETCH()
-#define TSRMLS_SET_CTX(z)
-#endif // PHP >= 8.0
-#endif
+#include <php_zookeeper.h>
 
 typedef struct _php_cb_data_t {
     zend_fcall_info fci;
@@ -37,12 +27,15 @@ typedef struct _php_cb_data_t {
     zend_bool oneshot;
     zend_long h;
     HashTable *ht;
-#if ZTS
-    void ***ctx;
+#ifdef ZTS
+	zend_zookeeper_globals *ctx;
+#if PHP_VERSION_ID >= 70100
+	zend_bool *vm_interrupt;
+#endif
 #endif
 } php_cb_data_t;
 
-php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC);
+php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot);
 void php_cb_data_destroy(php_cb_data_t *cbd);
 void php_cb_data_remove(php_cb_data_t *cb_data);
 

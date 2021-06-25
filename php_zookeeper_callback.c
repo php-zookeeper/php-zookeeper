@@ -19,7 +19,7 @@
 
 #include "php_zookeeper_callback.h"
 
-php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot TSRMLS_DC)
+php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot)
 {
     php_cb_data_t *cbd = ecalloc(1, sizeof(php_cb_data_t));
     cbd->fci = *fci;
@@ -29,8 +29,12 @@ php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_i
     Z_TRY_ADDREF(cbd->fci.function_name);
     zend_hash_next_index_insert_ptr(ht, (void*)cbd);
     cbd->ht = ht;
-#if ZTS
-    TSRMLS_SET_CTX(cbd->ctx);
+#ifdef ZTS
+	// Save pointer of globals' struct
+	cbd->ctx = ZK_G_P();
+#if PHP_VERSION_ID >= 70100
+	cbd->vm_interrupt = &EG(vm_interrupt);
+#endif
 #endif
     return cbd;
 }

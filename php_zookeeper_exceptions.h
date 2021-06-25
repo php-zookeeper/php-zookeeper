@@ -21,12 +21,12 @@
 /**
  * register exceptions
  */
-void php_zk_register_exceptions(TSRMLS_D);
-zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message TSRMLS_DC);
+void php_zk_register_exceptions();
+zend_class_entry * php_zk_get_exception_with_message(zend_class_entry *ce, char *message);
 /**
  * throw exception according to status
  */
-void php_zk_throw_exception(int zk_status TSRMLS_DC);
+void php_zk_throw_exception(int zk_status);
 
 #define PHPZK_INITIALIZATION_FAILURE 5999
 #define PHPZK_CONNECT_NOT_CALLED 5998

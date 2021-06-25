@@ -39,10 +39,10 @@ ps_module ps_mod_zookeeper = {
 	PS_MOD(zookeeper)
 };
 
-/* {{{ static php_zookeeper_session *php_zookeeper_session_init(char *save_path TSRMLS_DC)
+/* {{{ static php_zookeeper_session *php_zookeeper_session_init(char *save_path)
 	Initialize the session
 */
-static php_zookeeper_session *php_zookeeper_session_init(char *save_path TSRMLS_DC)
+static php_zookeeper_session *php_zookeeper_session_init(char *save_path)
 {
 	struct Stat stat;
 
@@ -68,17 +68,17 @@ static php_zookeeper_session *php_zookeeper_session_init(char *save_path TSRMLS_
 		if (status != ZOK) {
 			zookeeper_close(session->zk);
 			efree(session);
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create parent node for sessions");
+			php_error_docref(NULL, E_ERROR, "Failed to create parent node for sessions");
 		}
 	}
 	return session;
 }
 /* }}} */
 
-/* {{{ static php_zookeeper_session *php_zookeeper_session_get(char *save_path TSRMLS_DC)
+/* {{{ static php_zookeeper_session *php_zookeeper_session_get(char *save_path)
 	Get a connection. If connection does not exist in persistent list allocates a new one
 */
-static php_zookeeper_session *php_zookeeper_session_get(char *save_path TSRMLS_DC)
+static php_zookeeper_session *php_zookeeper_session_get(char *save_path)
 {
 	php_zookeeper_session *session = NULL;
 
@@ -96,12 +96,12 @@ static php_zookeeper_session *php_zookeeper_session_get(char *save_path TSRMLS_D
 		}
 	}
 
-	session = php_zookeeper_session_init(save_path TSRMLS_CC);
+	session = php_zookeeper_session_init(save_path);
 	le.type = php_zookeeper_get_connection_le();
 	le.ptr  = session;
 
 	if (!zend_hash_str_update_mem(&EG(persistent_list), (char *)plist_key, plist_key_len, (void *)&le, sizeof(le))) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not register persistent entry for the zk handle");
+		php_error_docref(NULL, E_ERROR, "Could not register persistent entry for the zk handle");
 	}
 
 	efree(plist_key);
@@ -115,7 +115,7 @@ static php_zookeeper_session *php_zookeeper_session_get(char *save_path TSRMLS_D
 */
 PS_OPEN_FUNC(zookeeper)
 {
-	php_zookeeper_session *session = php_zookeeper_session_get(PS(save_path) TSRMLS_CC);
+	php_zookeeper_session *session = php_zookeeper_session_get(PS(save_path));
 
 	if (!session) {
 		PS_SET_MOD_DATA(NULL);
@@ -126,10 +126,10 @@ PS_OPEN_FUNC(zookeeper)
 }
 /* }}} */
 
-/* {{{ static int php_zookeeper_sess_lock(php_zookeeper_session *session, const char *key TSRMLS_DC)
+/* {{{ static int php_zookeeper_sess_lock(php_zookeeper_session *session, const char *key)
 	Locking functionality. Adapted algo from memcached extension
 */
-static zend_bool php_zookeeper_sess_lock(php_zookeeper_session *session, const char *key TSRMLS_DC)
+static zend_bool php_zookeeper_sess_lock(php_zookeeper_session *session, const char *key)
 {
 	char *lock_path;
 	int lock_path_len;
@@ -183,8 +183,8 @@ PS_READ_FUNC(zookeeper)
 	int rbuf_len;
 
 	if (ZK_G(session_lock)) {
-		if (!php_zookeeper_sess_lock(session, SESSKEY TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create session mutex");
+		if (!php_zookeeper_sess_lock(session, SESSKEY)) {
+			php_error_docref(NULL, E_ERROR, "Failed to create session mutex");
 			return FAILURE;
 		}
 	}
