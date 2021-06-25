@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 1.0.1
+-------------
+	Bugs:
+    * Fix segfault caused by invalid ctx under ZTS mode
+
 Version 1.0.0
 -------------
 	Improvements:
