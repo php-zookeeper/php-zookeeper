@@ -58,4 +58,36 @@ RUN wget https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.5.9/apache-zoo
 	&& cd .. \
 	&& rm -rf apache-zookeeper-3.6.3*
 
+# PHP dependencies
+RUN apt update \
+	&& apt -y install libc-client-dev libxml2-dev libkrb5-dev \
+		libsqlite3-dev libz-dev libzip-dev libbz2-dev libcurl4-openssl-dev \
+		libgmp-dev libldap2-dev libsasl2-dev libonig-dev libpq-dev \
+		libreadline-dev libtidy-dev libxslt-dev
 
+# Before compiling
+RUN wget https://www.php.net/distributions/php-8.0.7.tar.bz2
+COPY default_configure_options.erb default_configure_options.erb
+
+# PHP 8.0 ZTS(Debug)
+RUN tar xvf php-8.0.7.tar.bz2 \
+	&& cd php-8.0.7 \
+		&& ./configure --prefix=/opt/php-8.0-zts-debug \
+			--enable-zts --enable-debug \
+			`cat default_configure_options.erb | xargs echo -n` \
+		&& make && make install \
+	&& cd .. \
+	&& rm -rf php-8.0.7
+
+# PHP 8.0 ZTS
+RUN tar xvf php-8.0.7.tar.bz2 \
+	&& cd php-8.0.7 \
+		&& ./configure --prefix=/opt/php-8.0-zts \
+			--enable-zts \
+			`cat default_configure_options.erb | xargs echo -n` \
+		&& make && make install \
+	&& cd .. \
+	&& rm -rf php-8.0.7
+
+RUN apt update \
+	&& apt -y install gdb

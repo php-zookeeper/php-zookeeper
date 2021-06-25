@@ -1,4 +1,4 @@
-DOCKER_IMAGE_TAG=0.0.1
+DOCKER_IMAGE_TAG=0.0.4
 DOCKER_IMAGE_URI=php-zookeeper/ubuntu-devel
 
 .PHONY: build
