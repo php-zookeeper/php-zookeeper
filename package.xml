@@ -27,21 +27,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>no</active>
  </developer>
- <date>2019-12-11</date>
+ <date>2020-06-25</date>
  <version>
-  <release>0.7.2</release>
+  <release>1.0.0</release>
   <api>0.7.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>alpha</api>
+  <release>alpha</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-Bugs:
-- Fix segfault due to double free of global callback data (GH PR #35)
-- Optimize callback-related statements
-- Fix build error with PHP 7.4 (GH PR #38)
+Improvements:
+- Make extension compatible with Zookeeper 3.6 (Thanks to camporter, GH PR #43)
+- Make extension compatible with PHP 8 (Thanks to John P. Bloch, GH PR #44)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -79,7 +78,7 @@ Bugs:
   <required>
    <php>
     <min>7.0.0</min>
-    <max>7.4.99</max>
+    <max>8.0.99</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -89,6 +88,17 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>stable</api></stability>
+   <version><release>1.0.0</release><api>0.7.0</api></version>
+   <date>2021-06-25</date>
+   <notes><![CDATA[
+Improvements:
+- Make extension compatible with Zookeeper 3.6 (Thanks to camporter, GH PR #43)
+- Make extension compatible with PHP 8 (Thanks to John P. Bloch, GH PR #44)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>beta</release><api>alpha</api></stability>
    <version><release>0.7.2</release><api>0.7.0</api></version>
