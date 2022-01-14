@@ -1057,7 +1057,9 @@ static void php_zk_completion_marshal(int rc, const void *context)
 	ctx->pending_marshals = 1;
 
 #ifdef ZTS
+#if PHP_VERSION_ID >= 70100
 	(*cb_data->vm_interrupt) = 1;
+#endif
 #else
 	EG(vm_interrupt) = 1;
 #endif

@@ -3,7 +3,8 @@ ZooKeeper Extension Changelog
 Version 1.0.1
 -------------
 	Bugs:
-    * Fix segfault caused by invalid ctx under ZTS mode
+	* Fix segfault caused by invalid ctx under ZTS mode
+	* Fix compilation error with PHP 7.0(ZTS)
 
 Version 1.0.0
 -------------
