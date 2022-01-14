@@ -91,3 +91,16 @@ RUN tar xvf php-8.0.7.tar.bz2 \
 
 RUN apt update \
 	&& apt -y install gdb
+
+# PHP 7.0 ZTS
+RUN wget https://www.php.net/distributions/php-7.0.33.tar.bz2 \
+	&& tar xvf php-7.0.33.tar.bz2 \
+	&& cd php-7.0.33 \
+		&& ./configure --prefix=/opt/php-7.0-zts \
+			--enable-maintainer-zts \
+			`cat default_configure_options.erb | xargs echo -n` \
+		&& make && make install \
+	&& cd .. \
+	&& rm -rf php-7.0.33*
+
+
