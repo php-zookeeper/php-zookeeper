@@ -12,6 +12,11 @@ env:
     - LIBZOOKEEPER_VERSION=3.5.9
     - LIBZOOKEEPER_VERSION=3.4.14
 
+jobs:
+    include:
+        - dist: bionic
+          php: 8.1.0
+
 addons:
   apt:
     packages:

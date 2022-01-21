@@ -13,6 +13,6 @@ files/exists_with_invalid_param.inc
 --EXPECTF--
 Fatal error: Uncaught TypeError: Zookeeper::exists(): Argument #2 ($watcher_cb) must be a valid callback or null, no array or string given in %s:%d
 Stack trace:
-#0 %s(%d): Zookeeper->exists('/test', 1)
+#0 %s(%d): Zookeeper->exists('/test', %f)
 #1 {main}
   thrown in %s on line %d
