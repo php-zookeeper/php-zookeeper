@@ -1559,7 +1559,7 @@ PHP_MINFO_FUNCTION(zookeeper)
 #if defined(ZOO_VERSION)
 	snprintf(buf, sizeof(buf), "%s", ZOO_VERSION);
 #else
-	snprintf(buf, sizeof(buf), "%ld.%ld.%ld", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
+	snprintf(buf, sizeof(buf), "%d.%d.%d", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
 #endif
 	php_info_print_table_row(2, "libzookeeper version", buf);
 
