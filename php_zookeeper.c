@@ -981,6 +981,10 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 
 	php_cb_data_t *cb_data = context;
 
+	if (!cb_data) {
+		return;
+	}
+
 #if HAVE_PTHREAD
 	pthread_mutex_lock(&cb_lock);
 #endif
