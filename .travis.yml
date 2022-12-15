@@ -41,4 +41,3 @@ script:
 
 after_success:
     - coveralls-lcov coverage.info
-
