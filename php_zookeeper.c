@@ -1009,15 +1009,15 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 	ctx->tail = p;
 	ctx->pending_marshals = 1;
 
-#if PHP_VERSION_ID >= 70100
 #ifdef ZTS
+#if PHP_VERSION_ID >= 70100
 	(*cb_data->vm_interrupt) = 1;
+#endif
 #else
 #if PHP_VERSION_ID >= 80200
-  EG(vm_interrupt) = (zend_atomic_bool){.value=1};
+    zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 #else
 	EG(vm_interrupt) = 1;
-#endif
 #endif
 #endif
 
@@ -1066,7 +1066,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 #endif
 #else
 #if PHP_VERSION_ID >= 80200
-  EG(vm_interrupt) = (zend_atomic_bool){.value=1};
+    zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
 #else
 	EG(vm_interrupt) = 1;
 #endif
