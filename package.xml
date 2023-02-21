@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>no</active>
  </developer>
- <date>2021-06-25</date>
+ <date>2023-02-21</date>
  <version>
-  <release>1.0.0</release>
+  <release>1.2.0</release>
   <api>0.7.0</api>
  </version>
  <stability>
@@ -39,8 +39,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
 Improvements:
-- Make extension compatible with Zookeeper 3.6 (Thanks to camporter, GH PR #43)
-- Make extension compatible with PHP 8 (Thanks to John P. Bloch, GH PR #44)
+- Make extension compatible with PHP 8.2 (Thanks to Federico J. Álvarez Valero and erikn69, GH PR #55, #56)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -88,6 +87,16 @@ Improvements:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>alpha</release><api>stable</api></stability>
+   <version><release>1.2.0</release><api>0.7.0</api></version>
+   <date>2023-02-21</date>
+   <notes><![CDATA[
+Improvements:
+- Make extension compatible with PHP 8.2 (Thanks to Federico J. Álvarez Valero and erikn69, GH PR #55, #56)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>stable</api></stability>
    <version><release>1.0.0</release><api>0.7.0</api></version>
