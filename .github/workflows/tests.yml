@@ -1,0 +1,68 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker:
+    strategy:
+      matrix:
+        image:
+          - 7.0-alpine
+#          - 7.0-stretch
+#          - 7.1-alpine
+#          - 7.2-alpine
+#          - 7.3-alpine
+#          - 7.4-alpine
+#          - 8.0-alpine
+#          - 8.1-alpine
+#          - 8.2-alpine
+#          - 8.2-bullseye
+        library-version:
+#          - 3.4.14
+#          - 3.5.9
+#          - 3.6.4
+          - 3.7.1
+    name: Test with ${{ matrix.image }} Docker image (library ${{ matrix.library-version }})
+    runs-on: ubuntu-latest
+    container: php:${{ matrix.image }}
+    steps:
+      - name: Install Alpine packages
+        if: contains(matrix.image, 'alpine')
+        run: apk update && apk add --upgrade $PHPIZE_DEPS maven automake libtool openjdk8
+      - name: Install Debian packages
+        if: "!contains(matrix.image, 'alpine')"
+        run: apt-get update -q && apt-get upgrade -qy && apt-get install -qy maven automake libtool
+      - name: Download libzookeeper source code
+        run: curl -f -o /tmp/apache-zookeeper.tgz https://archive.apache.org/dist/zookeeper/zookeeper-${{ matrix-library-version }}/apache-zookeeper-${{ matrix-library-version }}.tar.gz
+      - name: Decompress libzookeeper source code
+        run: tar -C /tmp -xz -f /tmp/apache-zookeeper.tgz
+      - name: Run Maven
+        run: |
+          cd -- /tmp/apache-zookeeper-*
+          mvn -pl zookeeper-jute compile
+          cd -- $GITHUB_WORKSPACE
+      - name: Compile C Client
+          cd -- /tmp/apache-zookeeper-*/zookeeper-client/zookeeper-client-c
+          autoreconf -if
+          ./configure --without-cppunit
+          make -j$(nproc) CFLAGS='-Wno-stringop-truncation -Wno-format-overflow'
+          make install
+          cd -- $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create PECL package
+        run: pecl package
+      - name: Install PECL package
+        run: |
+          cd /tmp
+          MAKE="make -j$(nproc)" pecl install $GITHUB_WORKSPACE/zookeeper-*.tgz
+          docker-php-ext-enable zookeeper
+          cd -- $GITHUB_WORKSPACE
+      - name: Inspect package
+        run: php --ri zookeeper
