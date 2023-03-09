@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 1.2.1
+-------------
+	Bugs:
+	* Fix compilation error with PHP 7.0 (Thanks to erikn69, GH PR #57)
+
 Version 1.2.0
 -------------
 	Improvements:
