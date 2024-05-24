@@ -68,3 +68,4 @@ tests/*.sh
 tests/*/*.sh
 tmp-php.ini
 reports/
+tmp
