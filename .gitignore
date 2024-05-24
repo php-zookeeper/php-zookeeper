@@ -48,6 +48,7 @@ Release_TSDbg
 Release_TS_inline
 Debug_TS
 memcached*.tgz
+zookeeper*.tgz
 run-tests.php
 cscope.out
 .project
