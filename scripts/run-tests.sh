@@ -1,6 +1,11 @@
 #!/bin/sh -e
+__ERR__="run-tests: ERROR:"
+
 __CURRENT__=$(cd "$(dirname "$0")";pwd)
 __DIR__=$(cd "$(dirname "${__CURRENT__}")";pwd)
+
+# Check that required commands is installed before doing anything
+command -v php >/dev/null 2>&1 || { >&2 echo "${__ERR__} php is not installed!"; return 255; }
 
 if [ -z "${TEST_PHP_EXECUTABLE}" ]; then
   export TEST_PHP_EXECUTABLE=`which php`

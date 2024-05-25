@@ -37,7 +37,6 @@ jobs:
 
       - name: Install extension
         run: |
-          phpize
           sudo ${{runner.workspace}}/php-zookeeper/scripts/pecl-install.sh
 
       - name: Run tests
