@@ -1,7 +1,10 @@
 # PHP ZooKeeper Extension
 
-[![Build Status](https://img.shields.io/travis/php-zookeeper/php-zookeeper/master.svg?style=flat-square)](https://travis-ci.org/php-zookeeper/php-zookeeper)
-[![Coveralls](https://img.shields.io/coveralls/php-zookeeper/php-zookeeper.svg?style=flat-square)](https://coveralls.io/r/php-zookeeper/php-zookeeper?branch=master)
+[![ext-zookeeper](https://img.shields.io/github/actions/workflow/status/php-zookeeper/php-zookeeper/ext.yaml?logo=github&style=flat-square&label=ext-zookeeper)](https://github.com/php-zookeeper/php-zookeeper/actions/workflows/ext.yaml)
+[![tests](https://img.shields.io/github/actions/workflow/status/php-zookeeper/php-zookeeper/test.yaml?logo=github&style=flat-square&label=tests)](https://github.com/php-zookeeper/php-zookeeper/actions/workflows/test.yaml)
+[![codecov](https://img.shields.io/codecov/c/github/php-zookeeper/php-zookeeper/master.svg?style=flat-square)](https://codecov.io/gh/php-zookeeper/php-zookeeper)
+[![Release](https://img.shields.io/github/v/release/php-zookeeper/php-zookeeper?display_name=tag&style=flat-square)](https://github.com/php-zookeeper/php-zookeeper/releases)
+[![License](https://img.shields.io/badge/License-PHP-blue.svg?style=flat-square)](https://github.com/php-zookeeper/php-zookeeper/blob/master/LICENSE)
 
 This extension uses libzookeeper library to provide API for communicating with
 ZooKeeper service.
