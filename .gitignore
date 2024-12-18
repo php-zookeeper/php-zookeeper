@@ -47,7 +47,8 @@ Release_TS
 Release_TSDbg
 Release_TS_inline
 Debug_TS
-memcached*.tgz
+*.tgz
+*.out
 run-tests.php
 cscope.out
 .project

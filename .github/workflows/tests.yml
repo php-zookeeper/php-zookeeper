@@ -1,0 +1,98 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  docker:
+    strategy:
+      matrix:
+        image:
+          #- 7.0-alpine
+          #- 7.0-stretch
+          #- 7.1-alpine
+          - 7.2-alpine
+          - 7.3-alpine
+          - 7.4-alpine
+          - 8.0-alpine
+          - 8.1-alpine
+          - 8.2-alpine
+          - 8.2-bullseye
+          - 8.3-alpine
+        library-version:
+          # - 3.3.6
+          - 3.4.14
+          - 3.5.10
+          - 3.6.4
+          - 3.7.2
+          - 3.8.4
+          - 3.9.3
+    name: Test with ${{ matrix.image }} Docker image (library ${{ matrix.library-version }})
+    runs-on: ubuntu-latest
+    container: php:${{ matrix.image }}
+    steps:
+      - name: Install Alpine packages
+        if: contains(matrix.image, 'alpine')
+        run: apk update && apk add --upgrade $PHPIZE_DEPS maven automake libtool openjdk8 bash
+      - name: Install Debian packages
+        if: "!contains(matrix.image, 'alpine')"
+        run: apt-get update -q && apt-get upgrade -qy && apt-get install -qy maven automake libtool
+      - uses: samcarswell/semver-compare-action@1.1
+        id: semver
+        with:
+          left-semver: ${{ matrix.library-version }}
+          right-semver: 3.5.5
+      - run: echo "libzookeeper=${{ steps.semver.outputs.compare-value >= 0 && 'apache-zookeeper' || 'zookeeper' }}" >> "$GITHUB_OUTPUT"
+        id: dir
+      - name: Download libzookeeper source code
+        run: curl -f -o /tmp/${{ steps.dir.outputs.libzookeeper }}.tgz https://archive.apache.org/dist/zookeeper/zookeeper-${{ matrix.library-version }}/${{ steps.dir.outputs.libzookeeper }}-${{ matrix.library-version }}.tar.gz
+      - name: Decompress libzookeeper source code
+        run: tar -C /tmp -xz -f /tmp/${{ steps.dir.outputs.libzookeeper }}.tgz
+      - name: Download libzookeeper (bin) source code
+        if: steps.semver.outputs.compare-value >= 0
+        run: curl -f -o /tmp/${{ steps.dir.outputs.libzookeeper }}-bin.tgz https://archive.apache.org/dist/zookeeper/zookeeper-${{ matrix.library-version }}/${{ steps.dir.outputs.libzookeeper }}-${{ matrix.library-version }}-bin.tar.gz
+      - name: Decompress libzookeeper (bin) source code
+        if: steps.semver.outputs.compare-value >= 0
+        run: tar -C /tmp -xz -f /tmp/${{ steps.dir.outputs.libzookeeper }}-bin.tgz
+      - name: Run Maven
+        run: |
+          cd -- /tmp/${{ steps.dir.outputs.libzookeeper }}-*
+          mvn -pl zookeeper-jute compile
+          cd -- $GITHUB_WORKSPACE
+      - name: Compile C Client
+        run: |
+          cd -- /tmp/${{ steps.dir.outputs.libzookeeper }}-*/zookeeper-client/zookeeper-client-c
+          ${{ steps.semver.outputs.compare-value >= 0 && 'autoreconf -if' || '' }}
+          ./configure --without-cppunit
+          make -j$(nproc) CFLAGS='-Wno-stringop-truncation -Wno-format-overflow'
+          make install
+          cd -- $GITHUB_WORKSPACE
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create PECL package
+        run: pecl package
+      - name: Install PECL package
+        run: |
+          cd /tmp
+          MAKE="make -j$(nproc)" pecl install $GITHUB_WORKSPACE/zookeeper-*.tgz
+          docker-php-ext-enable zookeeper
+          cd -- $GITHUB_WORKSPACE
+      - name: Inspect package
+        run: php --ri zookeeper
+      - name: Setup Zookeeper
+        if: steps.semver.outputs.compare-value < 0
+        run: /tmp/${{ steps.dir.outputs.libzookeeper }}-*/bin/zkServer.sh start /tmp/${{ steps.dir.outputs.libzookeeper }}-*/conf/zoo_sample.cfg
+      - name: Setup Zookeeper (bin)
+        if: steps.semver.outputs.compare-value >= 0
+        run: |
+          cd /tmp/${{ steps.dir.outputs.libzookeeper }}-*-bin
+          $GITHUB_WORKSPACE/dev-tools/init_zk_instances.sh
+          $GITHUB_WORKSPACE/dev-tools/launch_zk_instances.sh
+          cd -- $GITHUB_WORKSPACE
+      - name: Test package
+        run: TEST_PHP_EXECUTABLE=$(command -v php) php -n -d open_basedir= -d output_buffering=0 -d memory_limit=-1 -d extension=zookeeper.so /usr/local/lib/php/build/run-tests.php tests
