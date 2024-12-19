@@ -1,0 +1,43 @@
+---
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: test
+    runs-on: [ubuntu-20.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.1', '8.2', '8.3']
+        zk: ['3.7.2', '3.8.4', '3.9.2']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update OS
+        run: |
+          sudo apt-get -yqq install ant default-jdk libcppunit-dev maven wget
+
+      - name: Download and install zookeeper client
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-client-install.sh ${{ matrix.zk }}
+
+      - name: Download and run zookeeper server
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-install.sh ${{ matrix.zk }}
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-init.sh
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "${{ matrix.php }}"
+          coverage: none
+
+      - name: Install extension
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/pecl-install.sh
+
+      - name: Run tests
+        run:  ${{runner.workspace}}/php-zookeeper/scripts/run-tests.sh

@@ -1,0 +1,46 @@
+---
+name: extension
+
+on: [push, pull_request]
+
+jobs:
+  extension:
+    name: extension
+    runs-on: [ubuntu-20.04]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update OS
+        run: |
+          sudo apt-get -yqq install ant default-jdk lcov libcppunit-dev maven wget
+
+      - name: Download and install zookeeper client
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-client-install.sh 3.9.2
+
+      - name: Download and run zookeeper server
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-install.sh 3.9.2
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-init.sh
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Install extension
+        run: |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/pecl-install.sh --with-coverage
+
+      - name: Run tests with coverage
+        run:  |
+          sudo ${{runner.workspace}}/php-zookeeper/scripts/coverage.sh
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: contains(github.ref, 'master')
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.info
+          fail_ci_if_error: true
