@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Version 1.2.2
+-------------
+	Changes:
+	* Change max-version of required PHP (Thanks to johnpbloch, GH PR #61)
+
 Version 1.2.1
 -------------
 	Bugs:

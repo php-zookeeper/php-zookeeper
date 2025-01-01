@@ -27,9 +27,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <email>jbboehr@gmail.com</email>
   <active>no</active>
  </developer>
- <date>2023-03-09</date>
+ <date>2025-01-02</date>
  <version>
-  <release>1.2.1</release>
+  <release>1.2.2</release>
   <api>0.7.0</api>
  </version>
  <stability>
@@ -38,8 +38,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes><![CDATA[
-Bugs:
-- Fix compilation error with PHP 7.0 (Thanks to erikn69, GH PR #57)
+Changes:
+- Change max-version of required PHP (Thanks to johnpbloch, GH PR #61)
    ]]></notes>
  <contents>
   <dir name="/">
@@ -87,6 +87,16 @@ Bugs:
  <providesextension>zookeeper</providesextension>
  <extsrcrelease/>
  <changelog>
+  <release>
+   <stability><release>stable</release><api>stable</api></stability>
+   <version><release>1.2.2</release><api>0.7.0</api></version>
+   <date>2025-01-02</date>
+   <notes><![CDATA[
+Changes:
+- Change max-version of required PHP (Thanks to johnpbloch, GH PR #61)
+   ]]></notes>
+  </release>
+
   <release>
    <stability><release>alpha</release><api>stable</api></stability>
    <version><release>1.2.1</release><api>0.7.0</api></version>
