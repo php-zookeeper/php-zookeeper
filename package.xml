@@ -113,7 +113,7 @@ Bugs:
    <date>2023-02-21</date>
    <notes><![CDATA[
 Improvements:
-- Make extension compatible with PHP 8.2 (Thanks to Federico J. Álvarez Valero and erikn69, GH PR #55, #56)
+- Make extension compatible with PHP 8.2 (Thanks to @falvarez and erikn69, GH PR #55, #56)
    ]]></notes>
   </release>
 
