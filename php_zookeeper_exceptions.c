@@ -39,7 +39,11 @@ void php_zk_register_exceptions()
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "ZookeeperException", NULL);
+#if PHP_VERSION_ID >= 80500
+	zk_base_exception = zend_register_internal_class_ex(&ce, zend_ce_exception);
+#else
 	zk_base_exception = zend_register_internal_class_ex(&ce, zend_exception_get_default());
+#endif
 
 	INIT_CLASS_ENTRY(ce, "ZookeeperOperationTimeoutException", NULL);
 	zk_optimeout_exception = zend_register_internal_class_ex(&ce, zk_base_exception);

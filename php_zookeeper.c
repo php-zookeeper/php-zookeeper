@@ -39,7 +39,11 @@
 #include <ext/standard/info.h>
 #include <zend_extensions.h>
 
+#if PHP_VERSION_ID >= 80500
+#include <zend_smart_string.h>
+#else
 #include <ext/standard/php_smart_string.h>
+#endif
 
 #include "php_zookeeper.h"
 #include "php_zookeeper_private.h"
