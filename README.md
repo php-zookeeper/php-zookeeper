@@ -5,6 +5,7 @@
 [![codecov](https://img.shields.io/codecov/c/github/php-zookeeper/php-zookeeper/master.svg?style=flat-square)](https://codecov.io/gh/php-zookeeper/php-zookeeper)
 [![Release](https://img.shields.io/github/v/release/php-zookeeper/php-zookeeper?display_name=tag&style=flat-square)](https://github.com/php-zookeeper/php-zookeeper/releases)
 [![License](https://img.shields.io/badge/License-PHP-blue.svg?style=flat-square)](https://github.com/php-zookeeper/php-zookeeper/blob/master/LICENSE)
+[![DeepWiki](https://img.shields.io/badge/DeepWiki-visit-brightgreen?style=flat-square)](https://deepwiki.com/php-zookeeper/php-zookeeper)
 
 This extension uses libzookeeper library to provide API for communicating with
 ZooKeeper service.
