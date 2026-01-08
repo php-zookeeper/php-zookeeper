@@ -6,6 +6,7 @@ on: [push, pull_request]
 jobs:
   test:
     name: test
+    # See: https://github.com/actions/runner-images
     runs-on: [ubuntu-22.04]
     strategy:
       fail-fast: false

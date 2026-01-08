@@ -6,6 +6,7 @@ on: [push, pull_request]
 jobs:
   extension:
     name: extension
+    # See: https://github.com/actions/runner-images
     runs-on: [ubuntu-22.04]
     steps:
       - uses: actions/checkout@v4
