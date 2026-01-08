@@ -20,6 +20,7 @@ providing group services.
 
 - [ZooKeeper C Binding](https://zookeeper.apache.org/) (>= 3.4)
 - [PHP](http://www.php.net/) (>= 7.0)
+  - [PHP official supported versions](https://www.php.net/supported-versions.php)
 
 
 
