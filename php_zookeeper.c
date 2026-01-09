@@ -985,6 +985,10 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 
 	php_cb_data_t *cb_data = context;
 
+	if (!cb_data) {
+		return;
+	}
+
 #if HAVE_PTHREAD
 	pthread_mutex_lock(&cb_lock);
 #endif
@@ -1567,7 +1571,7 @@ PHP_MINFO_FUNCTION(zookeeper)
 #if defined(ZOO_VERSION)
 	snprintf(buf, sizeof(buf), "%s", ZOO_VERSION);
 #else
-	snprintf(buf, sizeof(buf), "%ld.%ld.%ld", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
+	snprintf(buf, sizeof(buf), "%d.%d.%d", ZOO_MAJOR_VERSION, ZOO_MINOR_VERSION, ZOO_PATCH_VERSION);
 #endif
 	php_info_print_table_row(2, "libzookeeper version", buf);
 
