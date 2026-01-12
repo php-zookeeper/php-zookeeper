@@ -53,6 +53,21 @@ $ cd apache-zookeeper-3.5.9
 $ cp build.xml ivy* ../apache-zookeeper-3.6.2
 ```
 
+As of ZooKeeper 3.7.0, after unpacking source tarball, first execute the following command with Java 8 to build jute files:
+
+```shell
+$ mvn compile
+```
+
+Then navigate to the C client directory and generate the configure file:
+
+```shell
+$ cd zookeeper-client/zookeeper-client-c
+$ autoreconf -if
+```
+
+After that, you can proceed with the standard build steps mentioned above.
+
 
 
 ### 2.Compile PHP ZooKeeper Extension
