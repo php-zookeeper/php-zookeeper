@@ -70,3 +70,5 @@ tests/*/*.sh
 tmp-php.ini
 reports/
 tmp
+*.dep
+configure~
