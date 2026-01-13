@@ -118,7 +118,7 @@ static PHP_METHOD(ZookeeperConfig, set)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -137,7 +137,7 @@ static PHP_METHOD(ZookeeperConfig, add)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -156,7 +156,7 @@ static PHP_METHOD(ZookeeperConfig, remove)
     int64_t version = -1;
     zval *stat_info_p = NULL;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz", &members, &members_len,
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/", &members, &members_len,
                               &version, &stat_info_p) == FAILURE) {
         return;
     }
@@ -166,7 +166,7 @@ static PHP_METHOD(ZookeeperConfig, remove)
 /* }}} */
 
 /* {{{ methods arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_conf_get, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_conf_get, 0, 0, 0)
     ZEND_ARG_INFO(0, watcher_cb)
     ZEND_ARG_INFO(1, stat_info)
 ZEND_END_ARG_INFO()
