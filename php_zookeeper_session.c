@@ -39,10 +39,10 @@ ps_module ps_mod_zookeeper = {
 	PS_MOD(zookeeper)
 };
 
-/* {{{ static php_zookeeper_session *php_zookeeper_session_init(char *save_path)
+/* {{{ static php_zookeeper_session *php_zookeeper_session_init(const char *save_path)
 	Initialize the session
 */
-static php_zookeeper_session *php_zookeeper_session_init(char *save_path)
+static php_zookeeper_session *php_zookeeper_session_init(const char *save_path)
 {
 	struct Stat stat;
 
@@ -75,10 +75,10 @@ static php_zookeeper_session *php_zookeeper_session_init(char *save_path)
 }
 /* }}} */
 
-/* {{{ static php_zookeeper_session *php_zookeeper_session_get(char *save_path)
+/* {{{ static php_zookeeper_session *php_zookeeper_session_get(const char *save_path)
 	Get a connection. If connection does not exist in persistent list allocates a new one
 */
-static php_zookeeper_session *php_zookeeper_session_get(char *save_path)
+static php_zookeeper_session *php_zookeeper_session_get(const char *save_path)
 {
 	php_zookeeper_session *session = NULL;
 
@@ -115,7 +115,13 @@ static php_zookeeper_session *php_zookeeper_session_get(char *save_path)
 */
 PS_OPEN_FUNC(zookeeper)
 {
-	php_zookeeper_session *session = php_zookeeper_session_get(PS(save_path));
+	php_zookeeper_session *session = php_zookeeper_session_get(
+#if PHP_VERSION_ID >= 80500
+		ZSTR_VAL(PS(save_path))
+#else
+		PS(save_path)
+#endif
+	);
 
 	if (!session) {
 		PS_SET_MOD_DATA(NULL);
