@@ -51,6 +51,7 @@ void php_cb_data_remove(php_cb_data_t *cb_data)
 {
 	if (cb_data && cb_data->ht) {
 		zend_hash_index_del(cb_data->ht, cb_data->h);
+		return;
 	}
 	php_cb_data_destroy(cb_data);
 }
