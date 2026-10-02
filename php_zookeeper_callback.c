@@ -25,10 +25,15 @@ php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_i
     cbd->fci = *fci;
     cbd->fcc = *fcc;
     cbd->oneshot = oneshot;
-    cbd->h = ht->nNextFreeElement;
-    Z_TRY_ADDREF(cbd->fci.function_name);
-    zend_hash_next_index_insert_ptr(ht, (void*)cbd);
+    /* PHP 8 initializes the next index with a sentinel; append uses key 0. */
+    cbd->h = ht->nNextFreeElement == ZEND_LONG_MIN ? 0 : ht->nNextFreeElement;
+    if (!zend_hash_index_add_ptr(ht, cbd->h, cbd)) {
+        efree(cbd);
+        zend_throw_error(NULL, "Could not register ZooKeeper callback");
+        return NULL;
+    }
     cbd->ht = ht;
+    Z_TRY_ADDREF(cbd->fci.function_name);
 #ifdef ZTS
 	// Save pointer of globals' struct
 	cbd->ctx = ZK_G_P();

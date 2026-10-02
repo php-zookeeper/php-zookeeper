@@ -81,6 +81,9 @@ static PHP_METHOD(ZookeeperConfig, get)
 
     if (fci.size != 0) {
         cb_data = php_cb_data_new(&i_obj->php_zk->callbacks, &fci, &fcc, 1);
+        if (!cb_data) {
+            return;
+        }
     }
 
     buffer = emalloc(length);
