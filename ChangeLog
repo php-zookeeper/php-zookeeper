@@ -1,5 +1,10 @@
 ZooKeeper Extension Changelog
 
+Unreleased
+----------
+	Bugs:
+	* Avoid double-free of watcher callback data after successful removal from the callback hash table (Thanks to John P. Bloch, GH PR #66)
+
 Version 1.3.0
 -------------
 	Improvements:
