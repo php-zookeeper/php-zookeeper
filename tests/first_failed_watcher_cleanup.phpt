@@ -16,6 +16,8 @@ foreach (array('get', 'getChildren', 'exists') as $method) {
         // An invalid path must fail even for exists(), which accepts ZNONODE.
         $client->$method('invalid/path', $callback);
     } catch (ZookeeperException $e) { $failed = true; }
+    // Exception traces can retain callable arguments independently of the extension.
+    unset($e);
     unset($callback);
     echo $method, ': ', $failed && $weak->get() === null ? 'released' : 'retained', PHP_EOL;
     $client->close();
