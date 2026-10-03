@@ -42,3 +42,8 @@ jobs:
 
       - name: Run tests
         run:  ${{runner.workspace}}/php-zookeeper/scripts/run-tests.sh
+
+      - name: Verify callback registry ownership
+        env:
+          LIBZOOKEEPER_DIR: /usr/local
+        run: bash dev-tools/test-callback-registry.sh
