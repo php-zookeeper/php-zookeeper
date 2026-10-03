@@ -5,7 +5,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: test
+    name: PHP ${{ matrix.php }} / ${{ matrix.ts }} / ZooKeeper ${{ matrix.zk }}
     # See: https://github.com/actions/runner-images
     runs-on: [ubuntu-22.04]
     strategy:
@@ -13,6 +13,7 @@ jobs:
       matrix:
         php: ['7.4', '8.1', '8.2', '8.3', '8.4', '8.5']
         zk: ['3.7.2', '3.8.4', '3.9.2']
+        ts: ['nts', 'zts']
 
     steps:
       - uses: actions/checkout@v4
@@ -23,22 +24,37 @@ jobs:
 
       - name: Download and install zookeeper client
         run: |
-          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-client-install.sh ${{ matrix.zk }}
+          sudo "${{ github.workspace }}/scripts/zk-client-install.sh" ${{ matrix.zk }}
 
       - name: Download and run zookeeper server
         run: |
-          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-install.sh ${{ matrix.zk }}
-          sudo ${{runner.workspace}}/php-zookeeper/scripts/zk-server-init.sh
+          sudo "${{ github.workspace }}/scripts/zk-server-install.sh" ${{ matrix.zk }}
+          sudo "${{ github.workspace }}/scripts/zk-server-init.sh"
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php }}"
           coverage: none
+        env:
+          phpts: ${{ matrix.ts }}
+
+      - name: Verify PHP thread safety
+        env:
+          EXPECTED_PHP_ZTS: ${{ matrix.ts == 'zts' && '1' || '0' }}
+        run: |
+          php -v
+          php -r '
+            $expected = (int) getenv("EXPECTED_PHP_ZTS");
+            if (PHP_ZTS !== $expected) {
+              fwrite(STDERR, "Expected PHP_ZTS=$expected, got " . PHP_ZTS . "\n");
+              exit(1);
+            }
+          '
 
       - name: Install extension
         run: |
-          sudo ${{runner.workspace}}/php-zookeeper/scripts/pecl-install.sh
+          sudo "${{ github.workspace }}/scripts/pecl-install.sh"
 
       - name: Run tests
-        run:  ${{runner.workspace}}/php-zookeeper/scripts/run-tests.sh
+        run: '"${{ github.workspace }}/scripts/run-tests.sh"'
