@@ -22,13 +22,22 @@
 php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot)
 {
     php_cb_data_t *cbd = ecalloc(1, sizeof(php_cb_data_t));
+    zend_long h = ht->nNextFreeElement;
     cbd->fci = *fci;
     cbd->fcc = *fcc;
     cbd->oneshot = oneshot;
-    cbd->h = ht->nNextFreeElement;
+    /* PHP 8 uses this sentinel until the first numeric key is inserted. */
+    if (h == ZEND_LONG_MIN) {
+        h = 0;
+    }
     Z_TRY_ADDREF(cbd->fci.function_name);
-    zend_hash_next_index_insert_ptr(ht, (void*)cbd);
+    if (!zend_hash_index_add_ptr(ht, (zend_ulong)h, cbd)) {
+        php_cb_data_destroy(cbd);
+        return NULL;
+    }
+    cbd->h = h;
     cbd->ht = ht;
+    ZEND_ASSERT(zend_hash_index_find_ptr(ht, (zend_ulong)cbd->h) == cbd);
 #ifdef ZTS
 	// Save pointer of globals' struct
 	cbd->ctx = ZK_G_P();
