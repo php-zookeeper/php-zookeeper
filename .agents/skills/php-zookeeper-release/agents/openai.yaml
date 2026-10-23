@@ -1,0 +1,4 @@
+interface:
+  display_name: "php-zookeeper Release"
+  short_description: "Prepare and validate php-zookeeper PEAR releases"
+  default_prompt: "Use $php-zookeeper-release to prepare a new version for this project, confirm the version with me first, and then perform the authorized release steps."
