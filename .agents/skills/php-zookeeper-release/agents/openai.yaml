@@ -1,4 +1,4 @@
 interface:
-  display_name: "php-zookeeper 发版"
-  short_description: "为 php-zookeeper 准备版本、验证 PEAR 源码包并完成发布"
-  default_prompt: "使用 $php-zookeeper-release 为当前项目准备新版本，先向我确认版本号，再按已授权范围执行发布。"
+  display_name: "php-zookeeper Release"
+  short_description: "Prepare and validate php-zookeeper PEAR releases"
+  default_prompt: "Use $php-zookeeper-release to prepare a new version for this project, confirm the version with me first, and then perform the authorized release steps."
