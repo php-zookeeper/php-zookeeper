@@ -30,5 +30,6 @@ void php_zk_throw_exception(int zk_status);
 
 #define PHPZK_INITIALIZATION_FAILURE 5999
 #define PHPZK_CONNECT_NOT_CALLED 5998
+#define PHPZK_CALLBACK_REGISTRATION_FAILURE 5997
 
 #endif  /* PHP_ZOOKEEPER_EXCEPTIONS */
