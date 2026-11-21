@@ -202,11 +202,6 @@ static zend_function_entry zookeeper_config_class_methods[] = {
 #undef ZK_CONF_ME
 /* }}} */
 
-static void php_zk_conf_destroy(php_zk_conf_t *i_obj)
-{
-    efree(i_obj);
-}
-
 static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj)
 {
     return (php_zk_conf_t *)((char*)(obj) - XtOffsetOf(php_zk_conf_t, zo));
@@ -214,11 +209,8 @@ static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj)
 
 static void php_zk_conf_free_storage(zend_object *obj)
 {
-    php_zk_conf_t *i_obj;
-
-    i_obj = php_zk_conf_fetch_object(obj);
-    zend_object_std_dtor(&i_obj->zo);
-    php_zk_conf_destroy(i_obj);
+    zend_object_std_dtor(obj);
+    /* Zend releases the enclosing allocation after free_obj returns. */
 }
 
 void php_zk_config_register()
