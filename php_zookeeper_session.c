@@ -39,6 +39,53 @@ ps_module ps_mod_zookeeper = {
 	PS_MOD(zookeeper)
 };
 
+#if PHP_VERSION_ID >= 80600
+PS_CREATE_SID_FUNC(zookeeper)
+{
+	return php_session_create_id(mod_data);
+}
+
+PS_VALIDATE_SID_FUNC(zookeeper)
+{
+	ZK_SESS_DATA;
+	char path[sizeof(session->path)];
+	struct Stat stat;
+	int status, attempt, path_len;
+	int64_t expiration_time;
+
+	if (!session || !session->zk || ZSTR_LEN(key) == 0 ||
+		ZSTR_LEN(key) >= sizeof(path) - sizeof(PHP_ZK_PARENT_NODE) ||
+		memchr(ZSTR_VAL(key), '\0', ZSTR_LEN(key)) != NULL ||
+		php_session_valid_key(ZSTR_VAL(key)) != SUCCESS) {
+		return FAILURE;
+	}
+
+	path_len = snprintf(path, sizeof(path), "%s/%s", PHP_ZK_PARENT_NODE, ZSTR_VAL(key));
+	if (path_len < 0 || (size_t) path_len >= sizeof(path)) {
+		return FAILURE;
+	}
+
+	/* Validation must not acquire the read lock or replace session->path. */
+	for (attempt = 0; attempt < 4; attempt++) {
+		status = zoo_exists(session->zk, path, 0, &stat);
+		if (status != ZCONNECTIONLOSS) {
+			break;
+		}
+	}
+
+	if (status == ZNONODE) {
+		return FAILURE;
+	}
+	if (status != ZOK) {
+		php_error_docref(NULL, E_WARNING, "Failed to validate ZooKeeper session ID: %s", zerror(status));
+		return FAILURE;
+	}
+
+	expiration_time = (int64_t) (SG(global_request_time) - PS(gc_maxlifetime)) * 1000;
+	return stat.mtime < expiration_time ? FAILURE : SUCCESS;
+}
+#endif
+
 /* {{{ static php_zookeeper_session *php_zookeeper_session_init(const char *save_path)
 	Initialize the session
 */

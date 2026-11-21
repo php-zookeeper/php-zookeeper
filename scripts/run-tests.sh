@@ -20,7 +20,7 @@ ${TEST_PHP_EXECUTABLE} \
   -d "open_basedir=" \
   -d "output_buffering=0" \
   -d "memory_limit=1024m" \
-  ${__DIR__}/run-tests.php ${__DIR__}/tests \
+  ${__DIR__}/run-tests.php -j1 ${__DIR__}/tests \
     -n \
     -d "extension_dir=modules" \
     -d "extension=zookeeper.so" \

@@ -27,6 +27,7 @@
 #include <pthread.h>
 #endif
 
+#include <stddef.h>
 #include <php.h>
 #include <php_ticks.h>
 
@@ -130,7 +131,7 @@ static void php_zk_interrupt_function(zend_execute_data *execute_data)
 ****************************************/
 
 static inline php_zk_t* php_zk_fetch_object(zend_object *obj) {
-	return (php_zk_t *)((char*)(obj) - XtOffsetOf(php_zk_t, zo));
+	return (php_zk_t *)((char*)(obj) - offsetof(php_zk_t, zo));
 }
 
 /****************************************
@@ -1471,7 +1472,7 @@ PHP_MINIT_FUNCTION(zookeeper)
 	zookeeper_ce->create_object = php_zk_new;
 
 	memcpy(&zookeeper_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	zookeeper_obj_handlers.offset = XtOffsetOf(php_zk_t, zo);
+	zookeeper_obj_handlers.offset = offsetof(php_zk_t, zo);
 	zookeeper_obj_handlers.free_obj = php_zk_free_storage;
 
 	/* set debug level to warning by default */
