@@ -18,6 +18,7 @@
 #include "config.h"
 #endif
 
+#include <stddef.h>
 #include <php.h>
 
 #include "php_zookeeper_class.h"
@@ -204,7 +205,7 @@ static zend_function_entry zookeeper_config_class_methods[] = {
 
 static inline php_zk_conf_t* php_zk_conf_fetch_object(zend_object *obj)
 {
-    return (php_zk_conf_t *)((char*)(obj) - XtOffsetOf(php_zk_conf_t, zo));
+    return (php_zk_conf_t *)((char*)(obj) - offsetof(php_zk_conf_t, zo));
 }
 
 static void php_zk_conf_free_storage(zend_object *obj)
@@ -222,7 +223,7 @@ void php_zk_config_register()
     php_zk_config_ce->create_object = php_zk_config_new;
 
     memcpy(&php_zk_conf_obj_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    php_zk_conf_obj_handlers.offset = XtOffsetOf(php_zk_conf_t, zo);
+    php_zk_conf_obj_handlers.offset = offsetof(php_zk_conf_t, zo);
     php_zk_conf_obj_handlers.free_obj = php_zk_conf_free_storage;
 }
 

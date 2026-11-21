@@ -23,6 +23,10 @@ providing group services.
   - [PHP official supported versions](https://www.php.net/supported-versions.php)
 - Session extension (install with `--enable-session`)
 
+On PHP 8.6 and later, the ZooKeeper session handler validates stored session
+IDs when `session.use_strict_mode=1`. Unknown or expired IDs are replaced with
+new IDs. Existing sessions, including empty sessions, retain their IDs.
+
 
 
 ## Install

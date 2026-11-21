@@ -2,6 +2,8 @@ ZooKeeper Extension Changelog
 
 Unreleased
 -------------
+	Improvements:
+	* Support PHP 8.6, including ZooKeeper-backed strict session ID validation
 	Bugs:
 	* Avoid double-free when destroying ZookeeperConfig objects (Issue #69, GH PR #85)
 
