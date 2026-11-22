@@ -25,6 +25,10 @@ foreach (array('get', 'getChildren', 'exists') as $method) {
 $callback = function ($type, $state, $path) {};
 $weak = WeakReference::create($callback);
 $client = new Zookeeper('localhost:2181', $callback);
+// Let the session settle and dispatch the queued session event while the
+// default watcher's callback data is still alive.
+$client->exists('/');
+zookeeper_dispatch();
 $client->close();
 unset($callback);
 echo 'default: ', $weak->get() === null ? 'released' : 'retained', PHP_EOL;
