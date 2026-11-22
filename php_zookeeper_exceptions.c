@@ -84,6 +84,10 @@ void php_zk_throw_exception(int zk_status)
 			ce = zk_connection_exception;
 			message = "Zookeeper->connect() was not called";
 			break;
+		case PHPZK_CALLBACK_REGISTRATION_FAILURE:
+			ce = zk_base_exception;
+			message = "Failed to register ZooKeeper callback";
+			break;
 		case ZCONNECTIONLOSS:
 			ce = zk_connection_exception;
 			break;
