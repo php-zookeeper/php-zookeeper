@@ -155,6 +155,9 @@ static void php_zookeeper_connect_impl(INTERNAL_FUNCTION_PARAMETERS, char *host,
 
 	if (fci->size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, fci, fcc, 0);
+		if (!cb_data) {
+			return;
+		}
 	}
 	zk = zookeeper_init(host, (fci->size != 0) ? php_zk_watcher_marshal : NULL,
 						recv_timeout, 0, cb_data, 0);
@@ -319,6 +322,9 @@ static PHP_METHOD(Zookeeper, getChildren)
 
 	if (fci.size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1);
+		if (!cb_data) {
+			return;
+		}
 	}
 	status = zoo_wget_children(i_obj->zk, path,
 							   (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
@@ -367,6 +373,9 @@ static PHP_METHOD(Zookeeper, get)
 
 	if (fci.size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1);
+		if (!cb_data) {
+			return;
+		}
 	}
 
 	if (max_size <= 0) {
@@ -436,6 +445,9 @@ static PHP_METHOD(Zookeeper, exists)
 
 	if (fci.size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 1);
+		if (!cb_data) {
+			return;
+		}
 	}
 	status = zoo_wexists(i_obj->zk, path, (fci.size != 0) ? php_zk_node_watcher_marshal : NULL,
 						 cb_data, &stat);
@@ -682,6 +694,9 @@ static PHP_METHOD(Zookeeper, addAuth)
 
 	if (fci.size != 0) {
 		cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 0);
+		if (!cb_data) {
+			return;
+		}
 	}
 	status = zoo_add_auth(i_obj->zk, scheme, cert, cert_len,
 						  (fci.size != 0) ? php_zk_completion_marshal : NULL, cb_data);
@@ -710,10 +725,13 @@ static PHP_METHOD(Zookeeper, setWatcher)
 
 	ZK_METHOD_FETCH_OBJECT;
 
+	cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 0);
+	if (!cb_data) {
+		return;
+	}
 	if (i_obj->cb_data) {
 		php_cb_data_remove(i_obj->cb_data);
 	}
-	cb_data = php_cb_data_new(&i_obj->callbacks, &fci, &fcc, 0);
 	zoo_set_watcher(i_obj->zk, php_zk_watcher_marshal);
 	i_obj->cb_data = cb_data;
 
