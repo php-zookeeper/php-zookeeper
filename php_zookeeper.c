@@ -730,7 +730,10 @@ static PHP_METHOD(Zookeeper, setWatcher)
 		return;
 	}
 	if (i_obj->cb_data) {
-		php_cb_data_remove(i_obj->cb_data);
+		/* A watcher invocation may still be in flight on the completion
+		 * thread and holds this pointer, so keep the old callback data alive
+		 * until close() while stopping queued events from invoking it. */
+		i_obj->cb_data->canceled = 1;
 	}
 	zoo_set_watcher(i_obj->zk, php_zk_watcher_marshal);
 	i_obj->cb_data = cb_data;
@@ -786,7 +789,12 @@ static PHP_METHOD(Zookeeper, close)
 		return;
 	}
 
-	ZK_METHOD_FETCH_OBJECT;
+	i_obj = Z_ZK_P(object);
+	if (!i_obj->zk) {
+		/* Closing a client that is already closed (or never connected) is a
+		 * no-op, so cleanup after a close() inside a callback stays safe. */
+		return;
+	}
 
 	php_zk_close(i_obj);
 }
@@ -830,22 +838,20 @@ PHP_FUNCTION(zookeeper_dispatch)
 /* {{{ constructor/destructor */
 static void php_zk_close(php_zk_t *i_obj)
 {
-	php_cb_data_t *cb_data_p;
+	zhandle_t *zk = i_obj->zk;
 
-	if (i_obj->cb_data) {
-		// Below line will free the callback data using the cb_data pointer
-		// stored in the Zookeeper instance. The destructor of the callbacks hashtable
-		// (php_cb_data_zv_destroy) already frees the callback data. Below line resulted
-		// in a double free, which triggers segfaults.
-		php_cb_data_remove(i_obj->cb_data);
-		i_obj->cb_data = NULL;
+	i_obj->zk = NULL;
+	if (zk) {
+		/* Joins the completion thread, so no watcher marshal can be in flight
+		 * once this returns. */
+		zookeeper_close(zk);
 	}
 
-	if (i_obj->zk) {
-		zookeeper_close(i_obj->zk);
-		i_obj->zk = NULL;
-	}
+	i_obj->cb_data = NULL;
 
+	/* Cancel every remaining callback instead of freeing it here: queued
+	 * events and the active dispatch frame keep their own references and
+	 * release them when they are done. */
 	zend_hash_clean(&i_obj->callbacks);
 }
 
@@ -867,7 +873,12 @@ static void php_zk_free_storage(zend_object *obj)
 static void php_cb_data_zv_destroy(zval *entry)
 {
 	if( Z_TYPE_P(entry) == IS_PTR ) {
-		php_cb_data_destroy((php_cb_data_t *)Z_PTR_P(entry)); // php_cb_data_t
+		php_cb_data_t *cb_data = (php_cb_data_t *)Z_PTR_P(entry); // php_cb_data_t
+		/* The table reference is gone: never invoke this callback again, but
+		 * keep the data alive while a queue entry or dispatch frame uses it. */
+		cb_data->ht = NULL;
+		cb_data->canceled = 1;
+		php_cb_data_release(cb_data);
 	}
 }
 
@@ -892,7 +903,7 @@ static inline void php_zk_dispatch_one(php_cb_data_t *cb_data, int type, int sta
 
 	ZVAL_LONG(&params[0], type);
 	ZVAL_LONG(&params[1], state);
-	ZVAL_STRING(&params[2], (char *)path);
+	ZVAL_STRING(&params[2], (char *)(path ? path : ""));
 
 	cb_data->fci.retval = &retval;
 
@@ -953,33 +964,69 @@ static void php_zk_dispatch()
 	pthread_mutex_lock(&cb_lock);
 #endif
 
+	if( !ZK_G(head) ) {
+#if HAVE_PTHREAD
+		pthread_mutex_unlock(&cb_lock);
+#endif
+		return;
+	}
+
 	// Prevent reentrant handler calls
 	ZK_G(processing_marshal_queue) = 1;
 
 	queue = ZK_G(head);
-	ZK_G(head) = NULL; /* simple stores are atomic */
+	ZK_G(head) = NULL;
+	ZK_G(tail) = NULL;
+
+#if HAVE_PTHREAD
+	/* Never hold cb_lock while user callbacks run: a callback may close this
+	 * client, and zookeeper_close() waits for the completion thread, which may
+	 * be blocked on this lock inside a marshal. */
+	pthread_mutex_unlock(&cb_lock);
+#endif
 
 	while( queue ) {
+		php_cb_data_t *cb_data = queue->cb_data;
+
 		// Process
-		if( queue->is_completion ) {
-			php_zk_dispatch_one_completion(queue->cb_data, queue->rc);
-		} else {
-			php_zk_dispatch_one(queue->cb_data, queue->type, queue->state, queue->path);
+		if( cb_data && !cb_data->canceled ) {
+			if( queue->is_completion ) {
+				php_zk_dispatch_one_completion(cb_data, queue->rc);
+			} else {
+				php_zk_dispatch_one(cb_data, queue->type, queue->state, queue->path);
+			}
 		}
 
 		// Move
 		next = queue->next;
 		free(queue->path);
 		free(queue);
+		php_cb_data_release(cb_data);
 		queue = next;
 	}
 
 	ZK_G(processing_marshal_queue) = 0;
-	ZK_G(pending_marshals) = 0;
 
+#if HAVE_PTHREAD
+	pthread_mutex_lock(&cb_lock);
+#endif
+	ZK_G(pending_marshals) = ZK_G(head) != NULL;
 #if HAVE_PTHREAD
 	pthread_mutex_unlock(&cb_lock);
 #endif
+
+	/* User callbacks may have let new events queue up. Wake PHP so that the
+	 * next interrupt dispatches them instead of leaving them for a later
+	 * explicit dispatch() call. */
+	if( ZK_G(head) ) {
+#if PHP_VERSION_ID >= 70100
+#if PHP_VERSION_ID >= 80200
+		zend_atomic_bool_store_ex(&EG(vm_interrupt), true);
+#else
+		EG(vm_interrupt) = 1;
+#endif
+#endif
+	}
 
 }
 
@@ -1016,11 +1063,10 @@ void php_zk_watcher_marshal(zhandle_t *zk, int type, int state, const char *path
 
 	// Allocate new item
 	struct php_zk_pending_marshal *p = calloc(1, sizeof(struct php_zk_pending_marshal));
-	p->cb_data = context;
+	p->cb_data = php_cb_data_addref(cb_data);
 	p->type = type;
 	p->state = state;
-	p->path = strdup(path);
-	p->cb_data = cb_data;
+	p->path = strdup(path ? path : "");
 
 	// Add to list
 	if( ctx->head && ctx->tail ) {
@@ -1071,7 +1117,7 @@ static void php_zk_completion_marshal(int rc, const void *context)
 	struct php_zk_pending_marshal *p = calloc(1, sizeof(struct php_zk_pending_marshal));
 	p->is_completion = 1;
 	p->rc = rc;
-	p->cb_data = cb_data;
+	p->cb_data = php_cb_data_addref(cb_data);
 
 	// Add to list
 	if( ctx->head && ctx->tail ) {
@@ -1549,8 +1595,12 @@ PHP_RSHUTDOWN_FUNCTION(zookeeper)
 	while( ZK_G(head) ) {
 		sig = ZK_G(head);
 		ZK_G(head) = sig->next;
+		php_cb_data_release(sig->cb_data);
+		free(sig->path);
 		free(sig);
 	}
+	ZK_G(tail) = NULL;
+	ZK_G(pending_marshals) = 0;
 
 #if HAVE_PTHREAD
 	pthread_mutex_destroy(&cb_lock);

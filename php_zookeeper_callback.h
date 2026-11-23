@@ -27,6 +27,11 @@ typedef struct _php_cb_data_t {
     zend_bool oneshot;
     zend_long h;
     HashTable *ht;
+    /* The callbacks table, every queued pending marshal and an active dispatch
+     * frame each hold a reference. */
+    uint32_t refcount;
+    /* Set once the table reference is gone: queued events must not invoke it. */
+    zend_bool canceled;
 #ifdef ZTS
 	zend_zookeeper_globals *ctx;
 #if PHP_VERSION_ID >= 70100
@@ -36,7 +41,8 @@ typedef struct _php_cb_data_t {
 } php_cb_data_t;
 
 php_cb_data_t* php_cb_data_new(HashTable *ht, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_bool oneshot);
-void php_cb_data_destroy(php_cb_data_t *cbd);
+php_cb_data_t* php_cb_data_addref(php_cb_data_t *cbd);
+void php_cb_data_release(php_cb_data_t *cbd);
 void php_cb_data_remove(php_cb_data_t *cb_data);
 
 #endif  /* PHP_ZOOKEEPER_CALLBACK */
